@@ -1,0 +1,110 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "D:\\lighthouse\\contracts\\contracts\\DepositManager.sol": {
+      "lastModificationDate": 1647417940873,
+      "contentHash": "b7b9ccac56e33d5ba6b31a37c0547ea8",
+      "sourceName": "contracts/DepositManager.sol",
+      "solcConfig": {
+        "version": "0.7.3",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.22 <0.8.0"
+      ],
+      "artifacts": [
+        "DepositManager"
+      ]
+    },
+    "D:\\lighthouse\\contracts\\contracts\\Lighthouse.sol": {
+      "lastModificationDate": 1647417940874,
+      "contentHash": "6c00205da41d48af8c8a95d95f40653a",
+      "sourceName": "contracts/Lighthouse.sol",
+      "solcConfig": {
+        "version": "0.7.3",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.22 <0.8.0"
+      ],
+      "artifacts": [
+        "Lighthouse"
+      ]
+    },
+    "D:\\lighthouse\\contracts\\contracts\\ProviderRegistry.sol": {
+      "lastModificationDate": 1647417940874,
+      "contentHash": "e5fe2f6a1b607549200ec577dd486b1c",
+      "sourceName": "contracts/ProviderRegistry.sol",
+      "solcConfig": {
+        "version": "0.7.3",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.22 <0.8.0"
+      ],
+      "artifacts": [
+        "ProviderRegistry"
+      ]
+    }
+  }
+}
