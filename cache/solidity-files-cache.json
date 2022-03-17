@@ -37,8 +37,8 @@
       ]
     },
     "D:\\lighthouse\\contracts\\contracts\\Lighthouse.sol": {
-      "lastModificationDate": 1647417940874,
-      "contentHash": "6c00205da41d48af8c8a95d95f40653a",
+      "lastModificationDate": 1647544318452,
+      "contentHash": "5c8555504b26d66f58906115a600e781",
       "sourceName": "contracts/Lighthouse.sol",
       "solcConfig": {
         "version": "0.7.3",

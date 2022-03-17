@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.4.22 <0.8.0;
+pragma experimental ABIEncoderV2;
 
 contract Lighthouse  {
     address public owner = msg.sender;
@@ -18,6 +19,35 @@ contract Lighthouse  {
         bool active;
     }
 
+    //////////////////////////////////////////////////////////////
+
+    // changed code 
+
+    event StorageRequest_test(address indexed uploader,Content[] contents,uint timestamp);
+
+    modifier onlyOwner(){
+        require(msg.sender== owner);
+        _;
+    }
+
+
+    function store_test(Content[] memory _contents)
+        external
+        payable 
+        onlyOwner
+    {
+        require(msg.sender== owner);
+        emit StorageRequest_test(msg.sender,_contents,block.timestamp);
+
+        // uint currentTime = block.timestamp;
+        // emit StorageRequest(msg.sender, cid, config, msg.value, fileName, fileSize, currentTime);
+    }
+
+
+
+    //////////////////////////////////////////
+
+    
     event StorageRequest(address indexed uploader, string cid, string config, uint fileCost, string fileName, uint fileSize, uint timestamp);
     event StorageStatusRequest(address requester, string cid);
 
