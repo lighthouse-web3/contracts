@@ -36,6 +36,13 @@ describe('LighthouseContract',()=>{
     })
 
     it('Check the bundles',async ()=>{
+        const provider= await ethers.getDefaultProvider();
+        let balance;
+        console.log(owner);
+        await provider.getBalance(owner);
+        // console.log("initial balance", await provider.getBalance(owner));
+
+
         const cid_bundles=[... Array(100).keys()].fill('cid',0,100);
         const config=[... Array(100).keys()].fill('config',0,100);
         const fileCost=[... Array(100).keys()];
@@ -61,6 +68,9 @@ describe('LighthouseContract',()=>{
                 value: ethers.utils.parseEther("1.0")
             });
         }
+
+        // console.log("Final Balance", await provider.getBalance(owner));
+
 
 
         // await lighthouse.store_test(
