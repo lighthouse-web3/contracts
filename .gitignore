@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-node_modules
-=======
 node_modules
 .env
->>>>>>> main
+artifacts
+cache
