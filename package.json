@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/LighthouseWeb3/contracts/issues"
   },
-  "homepage": "https://github.com/LighthouseWeb3/contracts#readme"
+  "homepage": "https://github.com/LighthouseWeb3/contracts#readme",
+  "dependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@openzeppelin/hardhat-upgrades": "^1.16.1",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.6.1"
+  }
 }
