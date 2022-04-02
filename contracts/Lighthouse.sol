@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.4.22 <0.8.0;
+pragma experimental ABIEncoderV2;
 
 contract Lighthouse  {
     address public owner = msg.sender;
@@ -18,6 +19,8 @@ contract Lighthouse  {
         bool active;
     }
 
+
+    
     event StorageRequest(address indexed uploader, string cid, string config, uint fileCost, string fileName, uint fileSize, uint timestamp);
     event StorageStatusRequest(address requester, string cid);
 

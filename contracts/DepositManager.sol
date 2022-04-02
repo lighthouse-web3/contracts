@@ -10,9 +10,11 @@ contract DepositManager {
         _;
     }
 
-    struct Deposit {
+    // add data bytes 
+    struct Deposit { 
         uint timestamp;
         uint amount;
+        bytes data;
     }
 
     struct Storage {
@@ -32,11 +34,20 @@ contract DepositManager {
         uint256 amount
     );
 
-    function addDeposit() public payable {
+<<<<<<< HEAD
+    function addDeposit(bytes calldata data) public payable {
         require(msg.value > 0, "Must include deposit > 0");
 
-        deposits[msg.sender].push(Deposit(block.timestamp, msg.value));
-        emit AddDeposit(msg.sender, msg.value);
+        deposits[msg.sender].push(Deposit(block.timestamp, msg.value,data));
+        emit AddDeposit(msg.sender, msg.value,data);
+        // emit data parameter // 
+=======
+    function addDeposit(bytes memory data) public payable {
+        require(msg.value > 0, "Must include deposit > 0");
+
+        deposits[msg.sender].push(Deposit(block.timestamp, msg.value, data));
+        emit AddDeposit(msg.sender, msg.value,data);
+>>>>>>> main
 
         // top up storage against the deposit - above event emitted can be used in node
     }
