@@ -1,0 +1,431 @@
+{
+  "version": "3.2",
+  "log": [
+    {
+      "DepositManager": {
+        "src": "contracts\\DepositManager.sol:5",
+        "version": {
+          "withMetadata": "a8c182568fb4da43c3999f2befc2c42adeccc1e20b6e6789d96ac1f76ea6657a",
+          "withoutMetadata": "85c5b6e7d1462c6eaf900520e2171404dd331a3ae04331125c81e3978fee5c49",
+          "linkedWithoutMetadata": "85c5b6e7d1462c6eaf900520e2171404dd331a3ae04331125c81e3978fee5c49"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "addDeposit(bytes)",
+          "addWhitelistAddress(address)",
+          "removeWhitelistAddress(address)",
+          "listWhitelistAddresses()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "state-variable-assignment",
+            "name": "owner",
+            "src": "contracts\\DepositManager.sol:6"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "DepositManager",
+              "src": "contracts\\DepositManager.sol:6"
+            },
+            {
+              "label": "whitelistedAddresses",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_array(t_address)dyn_storage",
+              "contract": "DepositManager",
+              "src": "contracts\\DepositManager.sol:25"
+            },
+            {
+              "label": "deposits",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_mapping(t_address,t_array(t_struct(Deposit)23_storage)dyn_storage)",
+              "contract": "DepositManager",
+              "src": "contracts\\DepositManager.sol:27"
+            },
+            {
+              "label": "storageUsed",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_address,t_struct(Storage)30_storage)",
+              "contract": "DepositManager",
+              "src": "contracts\\DepositManager.sol:28"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_address)dyn_storage": {
+              "label": "address[]",
+              "numberOfBytes": "32"
+            },
+            "t_array(t_struct(Deposit)23_storage)dyn_storage": {
+              "label": "struct DepositManager.Deposit[]",
+              "numberOfBytes": "32"
+            },
+            "t_bytes_storage": {
+              "label": "bytes",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_array(t_struct(Deposit)23_storage)dyn_storage)": {
+              "label": "mapping(address => struct DepositManager.Deposit[])",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_struct(Storage)30_storage)": {
+              "label": "mapping(address => struct DepositManager.Storage)",
+              "numberOfBytes": "32"
+            },
+            "t_struct(Deposit)23_storage": {
+              "label": "struct DepositManager.Deposit",
+              "members": [
+                {
+                  "label": "timestamp",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "amount",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "data",
+                  "type": "t_bytes_storage",
+                  "offset": 0,
+                  "slot": "2"
+                }
+              ],
+              "numberOfBytes": "96"
+            },
+            "t_struct(Storage)30_storage": {
+              "label": "struct DepositManager.Storage",
+              "members": [
+                {
+                  "label": "cids",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "totalStored",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "availableStorage",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "2"
+                }
+              ],
+              "numberOfBytes": "96"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.1",
+          "flat": true
+        }
+      },
+      "Lighthouse": {
+        "src": "contracts\\Lighthouse.sol:4",
+        "version": {
+          "withMetadata": "8568bf4cf2762afdb75b07c2248dc7ac2ef3dedbb4f021b577d3d40ef1447331",
+          "withoutMetadata": "4b908f935289a1772e0eff05c84f63e4c7c21e9c5553b8f90b96c5943d4146ff",
+          "linkedWithoutMetadata": "4b908f935289a1772e0eff05c84f63e4c7c21e9c5553b8f90b96c5943d4146ff"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "store(string,string,string,uint256)",
+          "getPaid(uint256,address payable)",
+          "requestStorageStatus(string)",
+          "publishStorageStatus(string,string,bool)",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "state-variable-assignment",
+            "name": "owner",
+            "src": "contracts\\Lighthouse.sol:5"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Lighthouse",
+              "src": "contracts\\Lighthouse.sol:5"
+            },
+            {
+              "label": "statuses",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)230_storage)",
+              "contract": "Lighthouse",
+              "src": "contracts\\Lighthouse.sol:24"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_string_memory_ptr,t_struct(Status)230_storage)": {
+              "label": "mapping(string => struct Lighthouse.Status)",
+              "numberOfBytes": "32"
+            },
+            "t_string_memory_ptr": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(Status)230_storage": {
+              "label": "struct Lighthouse.Status",
+              "members": [
+                {
+                  "label": "dealIds",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "active",
+                  "type": "t_bool",
+                  "offset": 0,
+                  "slot": "1"
+                }
+              ],
+              "numberOfBytes": "64"
+            }
+          },
+          "layoutVersion": "1.1",
+          "flat": true
+        }
+      },
+      "ProviderRegistry": {
+        "src": "contracts\\ProviderRegistry.sol:5",
+        "version": {
+          "withMetadata": "b1ed5c5fafb08e094548612a226101fc5cc1c1f9794402e20d3bd0655bff468a",
+          "withoutMetadata": "b533ca26dd852cf4a9ed516fb53a6fb852b192c9ec19e8331a456c2864f69bb6",
+          "linkedWithoutMetadata": "b533ca26dd852cf4a9ed516fb53a6fb852b192c9ec19e8331a456c2864f69bb6"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "addProvider(address)",
+          "listProviders()",
+          "removeProvider(address)"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "state-variable-assignment",
+            "name": "owner",
+            "src": "contracts\\ProviderRegistry.sol:7"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "providers",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_array(t_address)dyn_storage",
+              "contract": "ProviderRegistry",
+              "src": "contracts\\ProviderRegistry.sol:6"
+            },
+            {
+              "label": "owner",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_address",
+              "contract": "ProviderRegistry",
+              "src": "contracts\\ProviderRegistry.sol:7"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_address)dyn_storage": {
+              "label": "address[]",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.1",
+          "flat": true
+        }
+      }
+    },
+    {
+      "Context": {
+        "src": "contracts\\lighthouse_test.sol:5",
+        "inherit": [],
+        "libraries": [],
+        "methods": [],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.1",
+          "flat": false
+        }
+      },
+      "Lighthouse": {
+        "src": "contracts\\lighthouse_test.sol:73",
+        "version": {
+          "withMetadata": "edf919b1e17ff366745887c4914559f7bd521cb90cd496bb79678d1caf68dde4",
+          "withoutMetadata": "f66313884eef0d5ad96f077e4276627c9bfaf23f66067a5de2b71e8cba1524ea",
+          "linkedWithoutMetadata": "f66313884eef0d5ad96f077e4276627c9bfaf23f66067a5de2b71e8cba1524ea"
+        },
+        "inherit": [
+          "Ownable",
+          "Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "store(string,string,string,uint256)",
+          "bundleStore(struct Lighthouse.Content[])",
+          "getPaid(uint256,address payable)",
+          "requestStorageStatus(string)",
+          "publishStorageStatus(string,string,bool)",
+          "()",
+          "()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "contracts\\lighthouse_test.sol:16"
+            },
+            {
+              "label": "statuses",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)143_storage)",
+              "contract": "Lighthouse",
+              "src": "contracts\\lighthouse_test.sol:94"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_string_memory_ptr,t_struct(Status)143_storage)": {
+              "label": "mapping(string => struct Lighthouse.Status)",
+              "numberOfBytes": "32"
+            },
+            "t_string_memory_ptr": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(Status)143_storage": {
+              "label": "struct Lighthouse.Status",
+              "members": [
+                {
+                  "label": "dealIds",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "active",
+                  "type": "t_bool",
+                  "offset": 0,
+                  "slot": "1"
+                }
+              ],
+              "numberOfBytes": "64"
+            }
+          },
+          "layoutVersion": "1.1",
+          "flat": true
+        }
+      },
+      "Ownable": {
+        "src": "contracts\\lighthouse_test.sol:15",
+        "inherit": [
+          "Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "owner()",
+          "renounceOwnership()",
+          "transferOwnership(address)"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "Ownable",
+            "src": "contracts\\lighthouse_test.sol:23"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_owner",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_address",
+              "contract": "Ownable",
+              "src": "contracts\\lighthouse_test.sol:16"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            }
+          },
+          "layoutVersion": "1.1",
+          "flat": true
+        }
+      }
+    }
+  ]
+}
