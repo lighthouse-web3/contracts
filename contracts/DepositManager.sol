@@ -13,6 +13,7 @@ contract DepositManager {
     struct Deposit {
         uint timestamp;
         uint amount;
+        uint storagePurchased;
     }
 
     struct Storage {
@@ -29,14 +30,14 @@ contract DepositManager {
     // Events
     event AddDeposit(
         address indexed depositor,
-        uint256 amount
+        uint256 amount,
+        uint256 storagePurchased
     );
 
-    function addDeposit() public payable {
+    function addDeposit(uint _storagePurchased) public payable {
         require(msg.value > 0, "Must include deposit > 0");
-
-        deposits[msg.sender].push(Deposit(block.timestamp, msg.value));
-        emit AddDeposit(msg.sender, msg.value);
+        deposits[msg.sender].push(Deposit(block.timestamp, msg.value, _storagePurchased));
+        emit AddDeposit(msg.sender, msg.value, _storagePurchased);
 
         // top up storage against the deposit - above event emitted can be used in node
     }
