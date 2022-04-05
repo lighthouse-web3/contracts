@@ -4,10 +4,10 @@ pragma solidity >=0.5.8 <0.8.0;
 
 contract ProviderRegistry {
     address[] public providers;
-    address owner = msg.sender;
+    address public owner = msg.sender;
 
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "only owner");
         _;
     }
 

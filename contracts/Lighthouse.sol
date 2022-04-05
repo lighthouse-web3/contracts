@@ -50,7 +50,7 @@ contract Lighthouse {
     }
 
     function getPaid(uint256 amount, address payable recipient) external {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "only owner");
         recipient.transfer(amount);
     }
 
@@ -64,7 +64,7 @@ contract Lighthouse {
         bool active
     ) external {
         // restrict it to only to the owner address
-        require(msg.sender == owner);
+        require(msg.sender == owner, "only owner");
         statuses[cid] = Status(dealIds, active);
     }
 

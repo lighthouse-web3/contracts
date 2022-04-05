@@ -83,6 +83,4 @@ contract Lighthouse is Ownable {
     }
 
     fallback() external payable {}
-
-    receive() external payable {}
 }
