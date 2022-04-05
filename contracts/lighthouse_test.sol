@@ -1,6 +1,6 @@
 // SPDX-License-Identifier:MIT
 
-pragma solidity ^0.8.0;
+pragma solidity >=0.5.8 < 0.8.0;
 
 import "@openzeppelin/contracts/utils/Context.sol"; // context file
 import "@openzeppelin/contracts/access/Ownable.sol"; // ownable contract
@@ -22,8 +22,9 @@ contract Lighthouse is Ownable{
         bool active;
     }
 
-    event StorageRequest(address indexed uploader, string cid, string config, uint fileCost, string fileName, uint fileSize, uint timestamp);
-    event BundleStorageRequest(address indexed uploader,Content[] contents,uint timestamp);
+    event StorageRequest(address indexed uploader, string cid, string config, 
+        uint fileCost, string fileName, uint fileSize, uint timestamp);
+    event BundleStorageRequest(address indexed uploader, Content[] contents,uint timestamp);
     event StorageStatusRequest(address requester, string cid);
 
     mapping(string => Status) public statuses; // address -> cid -> status
