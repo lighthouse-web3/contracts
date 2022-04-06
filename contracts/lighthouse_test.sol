@@ -7,7 +7,13 @@ import "@openzeppelin/contracts/utils/Context.sol"; // context file
 import "@openzeppelin/contracts/access/Ownable.sol"; // ownable contract
 
 
-contract Lighthouse is Ownable{
+contract Lighthouse is Ownable {
+
+    DepositManager public Deposit;
+
+    constructor(address _deposit){
+        Deposit= DepositManager(_deposit);
+    }
 
     struct Content {
         address user;
@@ -43,13 +49,13 @@ contract Lighthouse is Ownable{
         string calldata cid, 
         string calldata config, 
         string calldata fileName, 
-        uint fileSize
+        uint256 fileSize
     )
         external
         payable
     {
-        uint currentTime = block.timestamp;
-        DepositManager.updateStorage(msg.sender, fileSize, cid);
+        uint256 currentTime = block.timestamp;
+        Deposit.updateStorage(msg.sender, fileSize, cid);
         emit StorageRequest(msg.sender, cid, config, msg.value, fileName, fileSize, currentTime);
     }
 
@@ -60,6 +66,10 @@ contract Lighthouse is Ownable{
         payable
         onlyOwner 
     {
+        for(uint256 i=0;i < contents.length;i++) {
+            Deposit.updateStorage(contents[i].user, contents[i].fileSize, contents[i].cid);
+        }
+
         emit BundleStorageRequest(msg.sender,contents,block.timestamp);
     }
     

@@ -23,7 +23,9 @@ contract DepositManager {
     }
 
     address[] public whitelistedAddresses;
- 
+
+
+    mapping(address=> bool) public checkWhiteListAdresses;
     mapping (address => Deposit[]) public deposits;
     mapping (address => Storage) public storageUsed;
 
@@ -46,27 +48,25 @@ contract DepositManager {
     public 
     whitelisted(msg.sender) 
     {
-        Storage storage storageUpdate= storageUsed[user];
-        storageUpdate[user].cids.push(cid);
-        storageUpdate[user].totalStored = storageUpdate[user].totalStored + filesize;
-        storageUpdate[user].availableStorage = storageUpdate[user].availableStorage - filesize;
+        storageUsed[user].cids.push(cid);
+        storageUsed[user].totalStored = storageUsed[user].totalStored + filesize;
+        storageUsed[user].availableStorage = storageUsed[user].availableStorage - filesize;
     }
 
-    function updateAvailableStorage(address user, uint256 _availableStorage)
+    function updateAvailableStorage(address user, uint256 _availableStorage, uint256 _totalStored)
     public 
     whitelisted(msg.sender)
     {
-        Storage memory storageUpdate= Storage({
-            cids:[],
-            totalStored:0,
-            availableStorage:_availableStorage
-        });
+        Storage memory storageUpdate;
+        storageUpdate.availableStorage = _availableStorage;
+        storageUpdate.totalStored = _totalStored;
 
         storageUsed[user] = storageUpdate;
     }
 
     function addWhitelistAddress(address addr) public onlyOwner {
         whitelistedAddresses.push(addr);
+        checkWhiteListAdresses[addr] = true;
     }
 
     function removeWhitelistAddress(address addr) public onlyOwner {
@@ -77,10 +77,11 @@ contract DepositManager {
             }
         }
 
-        for (uint i = index; i<whitelistedAddresses.length-1; i++){
+        for (uint i = index; i < whitelistedAddresses.length-1; i++) {
             whitelistedAddresses[i] = whitelistedAddresses[i+1];
         }
         whitelistedAddresses.pop();
+        checkWhiteListAdresses[addr] = false;
     }
 
     function listWhitelistAddresses() public view returns (address[] memory) {
@@ -91,17 +92,8 @@ contract DepositManager {
         return addressList;
     }
 
-    modifier whitelisted(address user){
-        bool found= false;
-        for(int i=0;i < whitelistedAddresses.length;i++) {
-            if(whitelistedAddresses[i] == user) {
-                found = true;
-                break;
-            }
-
-        }
-
-        require(found == true, "Address is not a whitelisted address");
+    modifier whitelisted(address user) {
+        require(checkWhiteListAdresses[user] == true, "Address is not a whitelisted address");
         _;
     }
 }

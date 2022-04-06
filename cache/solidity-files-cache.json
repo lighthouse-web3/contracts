@@ -1,12 +1,12 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "D:\\lighthouse\\contracts\\contracts\\DepositManager.sol": {
-      "lastModificationDate": 1647417940873,
-      "contentHash": "b7b9ccac56e33d5ba6b31a37c0547ea8",
+    "D:\\lthouse\\contracts\\contracts\\DepositManager.sol": {
+      "lastModificationDate": 1649256403193,
+      "contentHash": "d0a7915aac498b6b1ade866bd4e977be",
       "sourceName": "contracts/DepositManager.sol",
       "solcConfig": {
-        "version": "0.7.3",
+        "version": "0.8.4",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -19,7 +19,8 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
               ],
               "": [
                 "ast"
@@ -30,18 +31,18 @@
       },
       "imports": [],
       "versionPragmas": [
-        ">=0.4.22 <0.8.0"
+        "^0.8.0"
       ],
       "artifacts": [
         "DepositManager"
       ]
     },
-    "D:\\lighthouse\\contracts\\contracts\\Lighthouse.sol": {
-      "lastModificationDate": 1647417940874,
-      "contentHash": "6c00205da41d48af8c8a95d95f40653a",
-      "sourceName": "contracts/Lighthouse.sol",
+    "D:\\lthouse\\contracts\\contracts\\lighthouse_test.sol": {
+      "lastModificationDate": 1649262575606,
+      "contentHash": "dcd9ea1b3120d7198a6a377fd94469a8",
+      "sourceName": "contracts/lighthouse_test.sol",
       "solcConfig": {
-        "version": "0.7.3",
+        "version": "0.8.4",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -54,7 +55,48 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./DepositManager.sol",
+        "@openzeppelin/contracts/utils/Context.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Lighthouse"
+      ]
+    },
+    "D:\\lthouse\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
+      "lastModificationDate": 1649146718947,
+      "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
+      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
               ],
               "": [
                 "ast"
@@ -65,18 +107,18 @@
       },
       "imports": [],
       "versionPragmas": [
-        ">=0.4.22 <0.8.0"
+        "^0.8.0"
       ],
       "artifacts": [
-        "Lighthouse"
+        "Context"
       ]
     },
-    "D:\\lighthouse\\contracts\\contracts\\ProviderRegistry.sol": {
-      "lastModificationDate": 1647417940874,
-      "contentHash": "e5fe2f6a1b607549200ec577dd486b1c",
-      "sourceName": "contracts/ProviderRegistry.sol",
+    "D:\\lthouse\\contracts\\node_modules\\@openzeppelin\\contracts\\access\\Ownable.sol": {
+      "lastModificationDate": 1649146724051,
+      "contentHash": "8398972af73b4e9e5ff3b31cad86234f",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
       "solcConfig": {
-        "version": "0.7.3",
+        "version": "0.8.4",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -89,7 +131,46 @@
                 "evm.bytecode",
                 "evm.deployedBytecode",
                 "evm.methodIdentifiers",
-                "metadata"
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "D:\\lthouse\\contracts\\contracts\\ProviderRegistry.sol": {
+      "lastModificationDate": 1649255513689,
+      "contentHash": "e5fe2f6a1b607549200ec577dd486b1c",
+      "sourceName": "contracts/ProviderRegistry.sol",
+      "solcConfig": {
+        "version": "0.7.0",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
               ],
               "": [
                 "ast"
