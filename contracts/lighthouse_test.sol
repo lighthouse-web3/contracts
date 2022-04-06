@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 
+import "./DepositManager.sol";
 import "@openzeppelin/contracts/utils/Context.sol"; // context file
 import "@openzeppelin/contracts/access/Ownable.sol"; // ownable contract
 
@@ -22,17 +23,33 @@ contract Lighthouse is Ownable{
         bool active;
     }
 
-    event StorageRequest(address indexed uploader, string cid, string config, uint fileCost, string fileName, uint fileSize, uint timestamp);
-    event BundleStorageRequest(address indexed uploader,Content[] contents,uint timestamp);
+    event StorageRequest(
+        address indexed uploader, 
+        string cid,
+        string config, 
+        uint fileCost, 
+        string fileName, 
+        uint fileSize, 
+        uint timestamp
+    );
+
+    event BundleStorageRequest(address indexed uploader, Content[] contents, uint timestamp);
+
     event StorageStatusRequest(address requester, string cid);
 
     mapping(string => Status) public statuses; // address -> cid -> status
 
-    function store(string calldata cid, string calldata config, string calldata fileName, uint fileSize)
+    function store(
+        string calldata cid, 
+        string calldata config, 
+        string calldata fileName, 
+        uint fileSize
+    )
         external
         payable
     {
         uint currentTime = block.timestamp;
+        DepositManager.updateStorage(msg.sender, fileSize, cid);
         emit StorageRequest(msg.sender, cid, config, msg.value, fileName, fileSize, currentTime);
     }
 
@@ -45,8 +62,7 @@ contract Lighthouse is Ownable{
     {
         emit BundleStorageRequest(msg.sender,contents,block.timestamp);
     }
-
-
+    
     function getPaid(uint amount, address payable recipient)
         external
         onlyOwner

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.4.22 <0.8.0;
+pragma solidity ^0.8.0;
 
 contract DepositManager {
     address owner = msg.sender;
@@ -17,9 +17,9 @@ contract DepositManager {
     }
 
     struct Storage {
-        uint cids;
-        uint totalStored;
-        uint availableStorage;
+        string[] cids;
+        uint256 totalStored;
+        uint256 availableStorage;
     }
 
     address[] public whitelistedAddresses;
@@ -40,6 +40,29 @@ contract DepositManager {
         emit AddDeposit(msg.sender, msg.value, _storagePurchased);
 
         // top up storage against the deposit - above event emitted can be used in node
+    }
+
+    function updateStorage(address user, uint256 filesize, string memory cid)
+    public 
+    whitelisted(msg.sender) 
+    {
+        Storage storage storageUpdate= storageUsed[user];
+        storageUpdate[user].cids.push(cid);
+        storageUpdate[user].totalStored = storageUpdate[user].totalStored + filesize;
+        storageUpdate[user].availableStorage = storageUpdate[user].availableStorage - filesize;
+    }
+
+    function updateAvailableStorage(address user, uint256 _availableStorage)
+    public 
+    whitelisted(msg.sender)
+    {
+        Storage memory storageUpdate= Storage({
+            cids:[],
+            totalStored:0,
+            availableStorage:_availableStorage
+        });
+
+        storageUsed[user] = storageUpdate;
     }
 
     function addWhitelistAddress(address addr) public onlyOwner {
@@ -66,5 +89,19 @@ contract DepositManager {
             addressList[i] = whitelistedAddresses[i];
         }
         return addressList;
+    }
+
+    modifier whitelisted(address user){
+        bool found= false;
+        for(int i=0;i < whitelistedAddresses.length;i++) {
+            if(whitelistedAddresses[i] == user) {
+                found = true;
+                break;
+            }
+
+        }
+
+        require(found == true, "Address is not a whitelisted address");
+        _;
     }
 }

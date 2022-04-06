@@ -67,6 +67,11 @@ module.exports = {
           // },
           saveDeployments: true,
       },
+      matictestnet:{
+          url: "https://rpc-mumbai.maticvigil.com/",
+          accounts:[PRIVATE_KEY],
+          saveDeployments:true,
+      },
   },
   etherscan: {
       // Your API key for Etherscan
