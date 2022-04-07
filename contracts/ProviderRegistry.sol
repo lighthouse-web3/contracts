@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.4.22 <0.8.0;
+pragma solidity >=0.5.8 <0.8.0;
 
-contract ProviderRegistry  {
+contract ProviderRegistry {
     address[] public providers;
-    address owner = msg.sender;
+    address public owner = msg.sender;
 
     modifier onlyOwner() {
-        require(msg.sender == owner);
+        require(msg.sender == owner, "only owner");
         _;
     }
 
@@ -30,18 +30,17 @@ contract ProviderRegistry  {
     }
 
     function removeProvider(address provider) public onlyOwner {
-        uint index = 0;
+        uint256 index = 0;
         for (index = 0; index < providers.length; index++) {
             if (providers[index] == provider) {
                 break;
             }
         }
 
-        for (uint i = index; i<providers.length-1; i++){
-            providers[i] = providers[i+1];
+        for (uint256 i = index; i < providers.length - 1; i++) {
+            providers[i] = providers[i + 1];
         }
         providers.pop();
         emit RemoveProvider(provider);
     }
-
 }
