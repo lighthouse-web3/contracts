@@ -27,6 +27,7 @@ contract Lighthouse {
         uint256 fileSize,
         uint256 timestamp
     );
+
     event StorageStatusRequest(address requester, string cid);
 
     mapping(string => Status) public statuses; // address -> cid -> status
