@@ -18,7 +18,8 @@ contract Lighthouse  {
         bool active;
     }
 
-    event StorageRequest(address indexed uploader, string cid, string config, uint fileCost, string fileName, uint fileSize, uint timestamp);
+    event StorageRequest(address indexed uploader, string cid, string config, uint fileCost,
+        string fileName, uint fileSize, uint timestamp);
     event StorageStatusRequest(address requester, string cid);
 
     mapping(string => Status) public statuses; // address -> cid -> status
