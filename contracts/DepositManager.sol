@@ -48,7 +48,7 @@ contract DepositManager {
     function updateStorage(
         address user,
         uint256 filesize,
-        string memory cid
+        string calldata cid
     ) public whitelisted(msg.sender) {
         storageUsed[user].cids.push(cid);
         storageUsed[user].totalStored =
