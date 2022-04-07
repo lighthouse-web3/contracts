@@ -11,9 +11,9 @@ contract DepositManager {
     }
 
     struct Deposit {
-        uint timestamp;
-        uint amount;
-        uint storagePurchased;
+        uint256 timestamp;
+        uint256 amount;
+        uint256 storagePurchased;
     }
 
     struct Storage {
@@ -24,10 +24,9 @@ contract DepositManager {
 
     address[] public whitelistedAddresses;
 
-
-    mapping(address=> bool) public checkWhiteListAdresses;
-    mapping (address => Deposit[]) public deposits;
-    mapping (address => Storage) public storageUsed;
+    mapping(address => bool) public checkWhiteListAdresses;
+    mapping(address => Deposit[]) public deposits;
+    mapping(address => Storage) public storageUsed;
 
     // Events
     event AddDeposit(
@@ -36,27 +35,35 @@ contract DepositManager {
         uint256 storagePurchased
     );
 
-    function addDeposit(uint _storagePurchased) public payable {
+    function addDeposit(uint256 _storagePurchased) public payable {
         require(msg.value > 0, "Must include deposit > 0");
-        deposits[msg.sender].push(Deposit(block.timestamp, msg.value, _storagePurchased));
+        deposits[msg.sender].push(
+            Deposit(block.timestamp, msg.value, _storagePurchased)
+        );
         emit AddDeposit(msg.sender, msg.value, _storagePurchased);
 
         // top up storage against the deposit - above event emitted can be used in node
     }
 
-    function updateStorage(address user, uint256 filesize, string memory cid)
-    public 
-    whitelisted(msg.sender) 
-    {
+    function updateStorage(
+        address user,
+        uint256 filesize,
+        string memory cid
+    ) public whitelisted(msg.sender) {
         storageUsed[user].cids.push(cid);
-        storageUsed[user].totalStored = storageUsed[user].totalStored + filesize;
-        storageUsed[user].availableStorage = storageUsed[user].availableStorage - filesize;
+        storageUsed[user].totalStored =
+            storageUsed[user].totalStored +
+            filesize;
+        storageUsed[user].availableStorage =
+            storageUsed[user].availableStorage -
+            filesize;
     }
 
-    function updateAvailableStorage(address user, uint256 _availableStorage, uint256 _totalStored)
-    public 
-    whitelisted(msg.sender)
-    {
+    function updateAvailableStorage(
+        address user,
+        uint256 _availableStorage,
+        uint256 _totalStored
+    ) public whitelisted(msg.sender) {
         Storage memory storageUpdate;
         storageUpdate.availableStorage = _availableStorage;
         storageUpdate.totalStored = _totalStored;
@@ -70,22 +77,24 @@ contract DepositManager {
     }
 
     function removeWhitelistAddress(address addr) public onlyOwner {
-        uint index = 0;
+        uint256 index = 0;
         for (index = 0; index < whitelistedAddresses.length; index++) {
             if (whitelistedAddresses[index] == addr) {
                 break;
             }
         }
 
-        for (uint i = index; i < whitelistedAddresses.length-1; i++) {
-            whitelistedAddresses[i] = whitelistedAddresses[i+1];
+        for (uint256 i = index; i < whitelistedAddresses.length - 1; i++) {
+            whitelistedAddresses[i] = whitelistedAddresses[i + 1];
         }
         whitelistedAddresses.pop();
         checkWhiteListAdresses[addr] = false;
     }
 
     function listWhitelistAddresses() public view returns (address[] memory) {
-        address[] memory addressList = new address[](whitelistedAddresses.length);
+        address[] memory addressList = new address[](
+            whitelistedAddresses.length
+        );
         for (uint256 i = 0; i < whitelistedAddresses.length; i++) {
             addressList[i] = whitelistedAddresses[i];
         }
@@ -93,7 +102,10 @@ contract DepositManager {
     }
 
     modifier whitelisted(address user) {
-        require(checkWhiteListAdresses[user] == true, "Address is not a whitelisted address");
+        require(
+            checkWhiteListAdresses[user] == true,
+            "Address is not a whitelisted address"
+        );
         _;
     }
 }

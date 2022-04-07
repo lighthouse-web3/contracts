@@ -1,3 +1,2 @@
 # contracts
-smart contracts for lighthouse
-[WIP]
+smart contracts for Lighthouse
