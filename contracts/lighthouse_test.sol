@@ -54,7 +54,7 @@ contract Lighthouse is Ownable {
         uint256 fileSize
     ) external payable {
         uint256 currentTime = block.timestamp;
-        Deposit.updateStorage(msg.sender, fileSize, cid);
+        Deposit.updateStorage.value(msg.value)(msg.sender, fileSize, cid);
         emit StorageRequest(
             msg.sender,
             cid,
@@ -70,7 +70,7 @@ contract Lighthouse is Ownable {
     // Paramater: content of the stored file i.e includes the address of the user
     function bundleStore(Content[] calldata contents) external payable onlyOwner {
         for (uint256 i = 0; i < contents.length; i++) {
-            Deposit.updateStorage(
+            Deposit.updateStorage.value(contents[i].fileCost)(
                 contents[i].user,
                 contents[i].fileSize,
                 contents[i].cid
