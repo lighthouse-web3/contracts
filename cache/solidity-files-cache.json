@@ -377,6 +377,44 @@
       "artifacts": [
         "ProviderRegistry"
       ]
+    },
+    "D:\\lthouse\\contracts\\contracts\\stablecoins\\dai.sol": {
+      "lastModificationDate": 1650642751000,
+      "contentHash": "4b07632077116e75ad4faa41e239d6ca",
+      "sourceName": "contracts/stablecoins/dai.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Dai"
+      ]
     }
   }
 }
