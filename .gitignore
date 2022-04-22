@@ -2,4 +2,7 @@ node_modules
 .env
 artifacts
 cache
+<<<<<<< HEAD
 package-lock.json
+=======
+>>>>>>> topup
