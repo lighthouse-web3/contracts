@@ -1,19 +1,29 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-let Lighthouse, lighthouse, Deposit, deposit, owner;
+let Lighthouse, lighthouse, Deposit, deposit, owner,StableCoin,stableCoin;
 
 beforeEach(async () => {
+  [owner] = await ethers.getSigners();
+  owner = owner.address;
+
   Deposit = await ethers.getContractFactory("DepositManager");
   deposit = await Deposit.deploy();
 
   Lighthouse = await ethers.getContractFactory("Lighthouse");
   lighthouse = await Lighthouse.deploy(deposit.address);
 
-  [owner] = await ethers.getSigners();
-  owner = owner.address;
+  StableCoin = await ethers.getContractFactory("Dai");
+  stableCoin = await StableCoin.deploy();
 
-  await deposit.addWhitelistAddress(lighthouse.address);
+  await stableCoin.faucet(deposit.address,1000);
+
+  // set the manager of the deposit contract;
+
+  await deposit.addCoin('DAI', stableCoin.address);
+
+  await deposit.changeManager(lighthouse.address);
+
 
   console.log(`Owner Address : ${owner}`);
   console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);
@@ -25,16 +35,18 @@ describe("LighthouseContract", () => {
     expect(await lighthouse.owner()).to.equal(owner);
   });
 
-  it("Lighthouse contract address should be whitelisted", async () => {
-    expect(await deposit.checkWhiteListAdresses(lighthouse.address)).to.equal(
-      true
-    );
+  it("Lighthouse Contract should be the manager of the deposit", async() => {
+    expect(await deposit.manager()).to.equal(lighthouse.address);
   });
 
-  it("On each store update the value of data cap", async () => {
-    await deposit.addWhitelistAddress(owner);
+  // it("Lighthouse contract address should be whitelisted", async () => {
+  //   expect(await deposit.checkWhiteListAdresses(lighthouse.address)).to.equal(
+  //     true
+  //   );
+  // });
 
-    await deposit.updateAvailableStorage(owner, 1000, 0);
+  it("On each store update the value of data cap", async () => {
+    await deposit.updateAvailableStorage(owner, 1000);
     // await deposit.updateStorage(owner, 100, 'abcd');
 
     const cid = "cid",
@@ -42,17 +54,15 @@ describe("LighthouseContract", () => {
       filename = "filename",
       filesize = 100;
     await lighthouse.store(cid, config, filename, filesize);
-    const storageUser = await deposit.storageUsed(owner);
+    const storageUser = await deposit.storageList(owner);
 
     console.log(` storage information of User : ${storageUser}`);
   });
 
   it("checking bundles", async () => {
-    await deposit.addWhitelistAddress(owner);
     await deposit.updateAvailableStorage(
       "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
-      1000000000,
-      0
+      1000000000
     );
 
     const cid_bundles = [...Array(1000).keys()].fill("cid", 0, 1000);
@@ -91,4 +101,16 @@ describe("LighthouseContract", () => {
       await lighthouse.bundleStore(chunkarr);
     }
   });
+
+  it("only Manager or owner could call the updateStoragefunctions", async () => {
+    await deposit.updateAvailableStorage(owner,1000);
+  });
+
+  it("Adding and removing Coins", async () => {
+
+  });
+
+
+
+
 });

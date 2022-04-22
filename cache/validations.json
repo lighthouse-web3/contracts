@@ -42,6 +42,27 @@
           "flat": true
         }
       },
+      "IERC20": {
+        "src": "@openzeppelin\\contracts\\token\\ERC20\\IERC20.sol:9",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "totalSupply()",
+          "balanceOf(address)",
+          "transfer(address,uint256)",
+          "allowance(address,address)",
+          "approve(address,uint256)",
+          "transferFrom(address,address,uint256)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.1",
+          "flat": false
+        }
+      },
       "Context": {
         "src": "@openzeppelin\\contracts\\utils\\Context.sol:16",
         "inherit": [],
@@ -56,29 +77,64 @@
           "flat": false
         }
       },
-      "DepositManager": {
-        "src": "contracts\\DepositManager.sol:5",
+      "SafeMath": {
+        "src": "@openzeppelin\\contracts\\utils\\math\\SafeMath.sol:16",
         "version": {
-          "withMetadata": "b8e16dc7a97295df151916d7270c1eb249076890a4d58e4143d272763833b20a",
-          "withoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51",
-          "linkedWithoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51"
+          "withMetadata": "e96c088265fb723a79b847223722ed9c8034dcd061caf652f25c4bd66d192c8e",
+          "withoutMetadata": "08d24783a787f8a51dea0c166bb6f91a4f0865e02d03d749f102d332e6ead0ff",
+          "linkedWithoutMetadata": "08d24783a787f8a51dea0c166bb6f91a4f0865e02d03d749f102d332e6ead0ff"
         },
         "inherit": [],
         "libraries": [],
+        "methods": [],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.1",
+          "flat": false
+        }
+      },
+      "DepositManager": {
+        "src": "contracts\\deposit_test\\DepositManager.sol:9",
+        "version": {
+          "withMetadata": "57f923342cd6e10ba04379edcfdf15bbc9ac70bfa85b2b104cd1dfb2a27e791e",
+          "withoutMetadata": "b9c3068b936e6f9bdccdaa9c594149f99ae54058cfaaa89752ce4134f1b39b13",
+          "linkedWithoutMetadata": "b9c3068b936e6f9bdccdaa9c594149f99ae54058cfaaa89752ce4134f1b39b13"
+        },
+        "inherit": [],
+        "libraries": [
+          "SafeMath"
+        ],
         "methods": [
-          "addDeposit(uint256)",
+          "addDeposit(string)",
+          "changeCostOfStorage(uint256)",
+          "compareStrings(string,string)",
+          "transferAmount(string,address,uint256)",
+          "addCoin(string,address)",
+          "removeCoin(string)",
           "updateStorage(address,uint256,string)",
-          "updateAvailableStorage(address,uint256,uint256)",
-          "addWhitelistAddress(address)",
-          "removeWhitelistAddress(address)",
-          "listWhitelistAddresses()"
+          "updateAvailableStorage(address,uint256)",
+          "changeOwner(address)",
+          "changeManager(address)"
         ],
         "linkReferences": [],
         "errors": [
           {
             "kind": "state-variable-assignment",
             "name": "owner",
-            "src": "contracts\\DepositManager.sol:6"
+            "src": "contracts\\deposit_test\\DepositManager.sol:12"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "manager",
+            "src": "contracts\\deposit_test\\DepositManager.sol:13"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "costOfStorage",
+            "src": "contracts\\deposit_test\\DepositManager.sol:14"
           }
         ],
         "layout": {
@@ -89,39 +145,55 @@
               "slot": "0",
               "type": "t_address",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:6"
+              "src": "contracts\\deposit_test\\DepositManager.sol:12"
             },
             {
-              "label": "whitelistedAddresses",
+              "label": "manager",
               "offset": 0,
               "slot": "1",
-              "type": "t_array(t_address)dyn_storage",
+              "type": "t_address",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:25"
+              "src": "contracts\\deposit_test\\DepositManager.sol:13"
             },
             {
-              "label": "checkWhiteListAdresses",
+              "label": "costOfStorage",
               "offset": 0,
               "slot": "2",
-              "type": "t_mapping(t_address,t_bool)",
+              "type": "t_uint256",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:28"
+              "src": "contracts\\deposit_test\\DepositManager.sol:14"
+            },
+            {
+              "label": "stableCoins",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_array(t_string_storage)dyn_storage",
+              "contract": "DepositManager",
+              "src": "contracts\\deposit_test\\DepositManager.sol:16"
             },
             {
               "label": "deposits",
               "offset": 0,
-              "slot": "3",
-              "type": "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)",
+              "slot": "4",
+              "type": "t_mapping(t_address,t_array(t_struct(Deposit)559_storage)dyn_storage)",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:29"
+              "src": "contracts\\deposit_test\\DepositManager.sol:18"
             },
             {
-              "label": "storageUsed",
+              "label": "storageList",
               "offset": 0,
-              "slot": "4",
-              "type": "t_mapping(t_address,t_struct(Storage)158_storage)",
+              "slot": "5",
+              "type": "t_mapping(t_address,t_struct(Storage)567_storage)",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:30"
+              "src": "contracts\\deposit_test\\DepositManager.sol:19"
+            },
+            {
+              "label": "stableCoin",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_mapping(t_string_memory_ptr,t_address)",
+              "contract": "DepositManager",
+              "src": "contracts\\deposit_test\\DepositManager.sol:20"
             }
           ],
           "types": {
@@ -129,39 +201,35 @@
               "label": "address",
               "numberOfBytes": "20"
             },
-            "t_array(t_address)dyn_storage": {
-              "label": "address[]",
-              "numberOfBytes": "32"
-            },
             "t_array(t_string_storage)dyn_storage": {
               "label": "string[]",
               "numberOfBytes": "32"
             },
-            "t_array(t_struct(Deposit)150_storage)dyn_storage": {
+            "t_array(t_struct(Deposit)559_storage)dyn_storage": {
               "label": "struct DepositManager.Deposit[]",
               "numberOfBytes": "32"
             },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)": {
+            "t_mapping(t_address,t_array(t_struct(Deposit)559_storage)dyn_storage)": {
               "label": "mapping(address => struct DepositManager.Deposit[])",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_address,t_bool)": {
-              "label": "mapping(address => bool)",
+            "t_mapping(t_address,t_struct(Storage)567_storage)": {
+              "label": "mapping(address => struct DepositManager.Storage)",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_address,t_struct(Storage)158_storage)": {
-              "label": "mapping(address => struct DepositManager.Storage)",
+            "t_mapping(t_string_memory_ptr,t_address)": {
+              "label": "mapping(string => address)",
+              "numberOfBytes": "32"
+            },
+            "t_string_memory_ptr": {
+              "label": "string",
               "numberOfBytes": "32"
             },
             "t_string_storage": {
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(Deposit)150_storage": {
+            "t_struct(Deposit)559_storage": {
               "label": "struct DepositManager.Deposit",
               "members": [
                 {
@@ -185,7 +253,7 @@
               ],
               "numberOfBytes": "96"
             },
-            "t_struct(Storage)158_storage": {
+            "t_struct(Storage)567_storage": {
               "label": "struct DepositManager.Storage",
               "members": [
                 {
@@ -219,11 +287,11 @@
         }
       },
       "Lighthouse": {
-        "src": "contracts\\lighthouse_test.sol:10",
+        "src": "contracts\\lighthouse_test.sol:9",
         "version": {
-          "withMetadata": "c907447e843a965849d53d9e837e4114e476c7e09299cbd45b7021bebe6727d2",
-          "withoutMetadata": "b08b62dc4b39c18e2fea3ff2e550043ce93eeed9416700ac761c553f92ec18b6",
-          "linkedWithoutMetadata": "b08b62dc4b39c18e2fea3ff2e550043ce93eeed9416700ac761c553f92ec18b6"
+          "withMetadata": "6899ae9cd4b7624acb5643cdad14b07eb58da2016ab2e5f4fa11126733fcc072",
+          "withoutMetadata": "1e88fc2b021d1df3b175642d125a1beeeb19f7145902c367d756869e927f2eeb",
+          "linkedWithoutMetadata": "1e88fc2b021d1df3b175642d125a1beeeb19f7145902c367d756869e927f2eeb"
         },
         "inherit": [
           "Ownable",
@@ -245,7 +313,7 @@
           {
             "kind": "constructor",
             "contract": "Lighthouse",
-            "src": "contracts\\lighthouse_test.sol:14"
+            "src": "contracts\\lighthouse_test.sol:12"
           }
         ],
         "layout": {
@@ -262,17 +330,17 @@
               "label": "Deposit",
               "offset": 0,
               "slot": "1",
-              "type": "t_contract(DepositManager)449",
+              "type": "t_contract(DepositManager)950",
               "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:12"
+              "src": "contracts\\lighthouse_test.sol:10"
             },
             {
               "label": "statuses",
               "offset": 0,
               "slot": "2",
-              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)489_storage)",
+              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)990_storage)",
               "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:46"
+              "src": "contracts\\lighthouse_test.sol:48"
             }
           ],
           "types": {
@@ -284,11 +352,11 @@
               "label": "bool",
               "numberOfBytes": "1"
             },
-            "t_contract(DepositManager)449": {
+            "t_contract(DepositManager)950": {
               "label": "contract DepositManager",
               "numberOfBytes": "20"
             },
-            "t_mapping(t_string_memory_ptr,t_struct(Status)489_storage)": {
+            "t_mapping(t_string_memory_ptr,t_struct(Status)990_storage)": {
               "label": "mapping(string => struct Lighthouse.Status)",
               "numberOfBytes": "32"
             },
@@ -300,7 +368,7 @@
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(Status)489_storage": {
+            "t_struct(Status)990_storage": {
               "label": "struct Lighthouse.Status",
               "members": [
                 {
@@ -365,6 +433,151 @@
           "flat": true
         }
       },
+      "ERC20": {
+        "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:35",
+        "version": {
+          "withMetadata": "08295699790c674c5574539ced5280dbb163cab91795b07eb9175feafd7c5c02",
+          "withoutMetadata": "7e7a4d2dea64835b308c8a359c3029d74988a4318ba8ef4240ab30513edfd448",
+          "linkedWithoutMetadata": "7e7a4d2dea64835b308c8a359c3029d74988a4318ba8ef4240ab30513edfd448"
+        },
+        "inherit": [
+          "IERC20Metadata",
+          "IERC20",
+          "Context"
+        ],
+        "libraries": [],
+        "methods": [
+          "(string,string)",
+          "name()",
+          "symbol()",
+          "decimals()",
+          "totalSupply()",
+          "balanceOf(address)",
+          "transfer(address,uint256)",
+          "allowance(address,address)",
+          "approve(address,uint256)",
+          "transferFrom(address,address,uint256)",
+          "increaseAllowance(address,uint256)",
+          "decreaseAllowance(address,uint256)"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "ERC20",
+            "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:54"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_balances",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:36"
+            },
+            {
+              "label": "_allowances",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:38"
+            },
+            {
+              "label": "_totalSupply",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_uint256",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:40"
+            },
+            {
+              "label": "_name",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_string_storage",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:42"
+            },
+            {
+              "label": "_symbol",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_string_storage",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:43"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(address => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.1",
+          "flat": true
+        }
+      },
+      "IERC20": {
+        "src": "@openzeppelin\\contracts\\token\\ERC20\\IERC20.sol:9",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "totalSupply()",
+          "balanceOf(address)",
+          "transfer(address,uint256)",
+          "allowance(address,address)",
+          "approve(address,uint256)",
+          "transferFrom(address,address,uint256)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.1",
+          "flat": false
+        }
+      },
+      "IERC20Metadata": {
+        "src": "@openzeppelin\\contracts\\token\\ERC20\\extensions\\IERC20Metadata.sol:13",
+        "inherit": [
+          "IERC20"
+        ],
+        "libraries": [],
+        "methods": [
+          "name()",
+          "symbol()",
+          "decimals()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.1",
+          "flat": false
+        }
+      },
       "Context": {
         "src": "@openzeppelin\\contracts\\utils\\Context.sol:16",
         "inherit": [],
@@ -379,29 +592,64 @@
           "flat": false
         }
       },
-      "DepositManager": {
-        "src": "contracts\\DepositManager.sol:5",
+      "SafeMath": {
+        "src": "@openzeppelin\\contracts\\utils\\math\\SafeMath.sol:16",
         "version": {
-          "withMetadata": "b8e16dc7a97295df151916d7270c1eb249076890a4d58e4143d272763833b20a",
-          "withoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51",
-          "linkedWithoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51"
+          "withMetadata": "e96c088265fb723a79b847223722ed9c8034dcd061caf652f25c4bd66d192c8e",
+          "withoutMetadata": "08d24783a787f8a51dea0c166bb6f91a4f0865e02d03d749f102d332e6ead0ff",
+          "linkedWithoutMetadata": "08d24783a787f8a51dea0c166bb6f91a4f0865e02d03d749f102d332e6ead0ff"
         },
         "inherit": [],
         "libraries": [],
+        "methods": [],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.1",
+          "flat": false
+        }
+      },
+      "DepositManager": {
+        "src": "contracts\\deposit_test\\DepositManager.sol:9",
+        "version": {
+          "withMetadata": "7052ad5c50d5578339e07c95b86b54be9d3b62b39b67bc1392c8293e5b8e9449",
+          "withoutMetadata": "6a6aad1d23993132c858448209288c614f8c23ad6ab09f88ad1fcd2d4bc10003",
+          "linkedWithoutMetadata": "6a6aad1d23993132c858448209288c614f8c23ad6ab09f88ad1fcd2d4bc10003"
+        },
+        "inherit": [],
+        "libraries": [
+          "SafeMath"
+        ],
         "methods": [
-          "addDeposit(uint256)",
+          "addDeposit(string)",
+          "changeCostOfStorage(uint256)",
+          "compareStrings(string,string)",
+          "transferAmount(string,address,uint256)",
+          "addCoin(string,address)",
+          "removeCoin(string)",
           "updateStorage(address,uint256,string)",
-          "updateAvailableStorage(address,uint256,uint256)",
-          "addWhitelistAddress(address)",
-          "removeWhitelistAddress(address)",
-          "listWhitelistAddresses()"
+          "updateAvailableStorage(address,uint256)",
+          "changeOwner(address)",
+          "changeManager(address)"
         ],
         "linkReferences": [],
         "errors": [
           {
             "kind": "state-variable-assignment",
             "name": "owner",
-            "src": "contracts\\DepositManager.sol:6"
+            "src": "contracts\\deposit_test\\DepositManager.sol:12"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "manager",
+            "src": "contracts\\deposit_test\\DepositManager.sol:13"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "costOfStorage",
+            "src": "contracts\\deposit_test\\DepositManager.sol:14"
           }
         ],
         "layout": {
@@ -412,39 +660,55 @@
               "slot": "0",
               "type": "t_address",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:6"
+              "src": "contracts\\deposit_test\\DepositManager.sol:12"
             },
             {
-              "label": "whitelistedAddresses",
+              "label": "manager",
               "offset": 0,
               "slot": "1",
-              "type": "t_array(t_address)dyn_storage",
+              "type": "t_address",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:25"
+              "src": "contracts\\deposit_test\\DepositManager.sol:13"
             },
             {
-              "label": "checkWhiteListAdresses",
+              "label": "costOfStorage",
               "offset": 0,
               "slot": "2",
-              "type": "t_mapping(t_address,t_bool)",
+              "type": "t_uint256",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:28"
+              "src": "contracts\\deposit_test\\DepositManager.sol:14"
+            },
+            {
+              "label": "stableCoins",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_array(t_string_storage)dyn_storage",
+              "contract": "DepositManager",
+              "src": "contracts\\deposit_test\\DepositManager.sol:16"
             },
             {
               "label": "deposits",
               "offset": 0,
-              "slot": "3",
-              "type": "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)",
+              "slot": "4",
+              "type": "t_mapping(t_address,t_array(t_struct(Deposit)1172_storage)dyn_storage)",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:29"
+              "src": "contracts\\deposit_test\\DepositManager.sol:18"
             },
             {
-              "label": "storageUsed",
+              "label": "storageList",
               "offset": 0,
-              "slot": "4",
-              "type": "t_mapping(t_address,t_struct(Storage)158_storage)",
+              "slot": "5",
+              "type": "t_mapping(t_address,t_struct(Storage)1180_storage)",
               "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:30"
+              "src": "contracts\\deposit_test\\DepositManager.sol:19"
+            },
+            {
+              "label": "stableCoin",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_mapping(t_string_memory_ptr,t_address)",
+              "contract": "DepositManager",
+              "src": "contracts\\deposit_test\\DepositManager.sol:20"
             }
           ],
           "types": {
@@ -452,39 +716,35 @@
               "label": "address",
               "numberOfBytes": "20"
             },
-            "t_array(t_address)dyn_storage": {
-              "label": "address[]",
-              "numberOfBytes": "32"
-            },
             "t_array(t_string_storage)dyn_storage": {
               "label": "string[]",
               "numberOfBytes": "32"
             },
-            "t_array(t_struct(Deposit)150_storage)dyn_storage": {
+            "t_array(t_struct(Deposit)1172_storage)dyn_storage": {
               "label": "struct DepositManager.Deposit[]",
               "numberOfBytes": "32"
             },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)": {
+            "t_mapping(t_address,t_array(t_struct(Deposit)1172_storage)dyn_storage)": {
               "label": "mapping(address => struct DepositManager.Deposit[])",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_address,t_bool)": {
-              "label": "mapping(address => bool)",
+            "t_mapping(t_address,t_struct(Storage)1180_storage)": {
+              "label": "mapping(address => struct DepositManager.Storage)",
               "numberOfBytes": "32"
             },
-            "t_mapping(t_address,t_struct(Storage)158_storage)": {
-              "label": "mapping(address => struct DepositManager.Storage)",
+            "t_mapping(t_string_memory_ptr,t_address)": {
+              "label": "mapping(string => address)",
+              "numberOfBytes": "32"
+            },
+            "t_string_memory_ptr": {
+              "label": "string",
               "numberOfBytes": "32"
             },
             "t_string_storage": {
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(Deposit)150_storage": {
+            "t_struct(Deposit)1172_storage": {
               "label": "struct DepositManager.Deposit",
               "members": [
                 {
@@ -508,7 +768,7 @@
               ],
               "numberOfBytes": "96"
             },
-            "t_struct(Storage)158_storage": {
+            "t_struct(Storage)1180_storage": {
               "label": "struct DepositManager.Storage",
               "members": [
                 {
@@ -542,11 +802,11 @@
         }
       },
       "Lighthouse": {
-        "src": "contracts\\lighthouse_test.sol:10",
+        "src": "contracts\\lighthouse_test.sol:9",
         "version": {
-          "withMetadata": "0593bd1bfff4368c39c3bfd002b29e9badd3264abea8417c13042cc71f6bb74a",
-          "withoutMetadata": "655e54be47161b464f17b7edd2788610c4db841555646f491d7adc3457ba2c5d",
-          "linkedWithoutMetadata": "655e54be47161b464f17b7edd2788610c4db841555646f491d7adc3457ba2c5d"
+          "withMetadata": "6c87b8859a2962e2b87c0e123a697cf0b3988fcde05840c0fdc81444b9b08869",
+          "withoutMetadata": "1e88fc2b021d1df3b175642d125a1beeeb19f7145902c367d756869e927f2eeb",
+          "linkedWithoutMetadata": "1e88fc2b021d1df3b175642d125a1beeeb19f7145902c367d756869e927f2eeb"
         },
         "inherit": [
           "Ownable",
@@ -568,7 +828,7 @@
           {
             "kind": "constructor",
             "contract": "Lighthouse",
-            "src": "contracts\\lighthouse_test.sol:14"
+            "src": "contracts\\lighthouse_test.sol:12"
           }
         ],
         "layout": {
@@ -585,17 +845,17 @@
               "label": "Deposit",
               "offset": 0,
               "slot": "1",
-              "type": "t_contract(DepositManager)449",
+              "type": "t_contract(DepositManager)1556",
               "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:12"
+              "src": "contracts\\lighthouse_test.sol:10"
             },
             {
               "label": "statuses",
               "offset": 0,
               "slot": "2",
-              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)489_storage)",
+              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)1596_storage)",
               "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:46"
+              "src": "contracts\\lighthouse_test.sol:48"
             }
           ],
           "types": {
@@ -607,11 +867,11 @@
               "label": "bool",
               "numberOfBytes": "1"
             },
-            "t_contract(DepositManager)449": {
+            "t_contract(DepositManager)1556": {
               "label": "contract DepositManager",
               "numberOfBytes": "20"
             },
-            "t_mapping(t_string_memory_ptr,t_struct(Status)489_storage)": {
+            "t_mapping(t_string_memory_ptr,t_struct(Status)1596_storage)": {
               "label": "mapping(string => struct Lighthouse.Status)",
               "numberOfBytes": "32"
             },
@@ -623,7 +883,7 @@
               "label": "string",
               "numberOfBytes": "32"
             },
-            "t_struct(Status)489_storage": {
+            "t_struct(Status)1596_storage": {
               "label": "struct Lighthouse.Status",
               "members": [
                 {
@@ -645,129 +905,74 @@
           "layoutVersion": "1.1",
           "flat": true
         }
-      }
-    },
-    {
-      "Ownable": {
-        "src": "@openzeppelin\\contracts\\access\\Ownable.sol:20",
+      },
+      "Dai": {
+        "src": "contracts\\stablecoins\\Dai.sol:6",
+        "version": {
+          "withMetadata": "7d7dd5f9f20959b6d10ed3eae22ea9a60feeef20ef0077f0cc9e5d03e7466e5d",
+          "withoutMetadata": "0393abb349e7b5bd8fcbbdf489a873088721284f7350cd497d4d964aee3c18ff",
+          "linkedWithoutMetadata": "0393abb349e7b5bd8fcbbdf489a873088721284f7350cd497d4d964aee3c18ff"
+        },
         "inherit": [
+          "ERC20",
+          "IERC20Metadata",
+          "IERC20",
           "Context"
         ],
         "libraries": [],
         "methods": [
-          "owner()",
-          "renounceOwnership()",
-          "transferOwnership(address)"
+          "()",
+          "faucet(address,uint256)"
         ],
         "linkReferences": [],
         "errors": [
           {
             "kind": "constructor",
-            "contract": "Ownable",
-            "src": "@openzeppelin\\contracts\\access\\Ownable.sol:28"
+            "contract": "Dai",
+            "src": "contracts\\stablecoins\\Dai.sol:7"
           }
         ],
         "layout": {
           "storage": [
             {
-              "label": "_owner",
+              "label": "_balances",
               "offset": 0,
               "slot": "0",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin\\contracts\\access\\Ownable.sol:21"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            }
-          },
-          "layoutVersion": "1.1",
-          "flat": true
-        }
-      },
-      "Context": {
-        "src": "@openzeppelin\\contracts\\utils\\Context.sol:16",
-        "inherit": [],
-        "libraries": [],
-        "methods": [],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.1",
-          "flat": false
-        }
-      },
-      "DepositManager": {
-        "src": "contracts\\DepositManager.sol:5",
-        "version": {
-          "withMetadata": "b8e16dc7a97295df151916d7270c1eb249076890a4d58e4143d272763833b20a",
-          "withoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51",
-          "linkedWithoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51"
-        },
-        "inherit": [],
-        "libraries": [],
-        "methods": [
-          "addDeposit(uint256)",
-          "updateStorage(address,uint256,string)",
-          "updateAvailableStorage(address,uint256,uint256)",
-          "addWhitelistAddress(address)",
-          "removeWhitelistAddress(address)",
-          "listWhitelistAddresses()"
-        ],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "state-variable-assignment",
-            "name": "owner",
-            "src": "contracts\\DepositManager.sol:6"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:6"
+              "type": "t_mapping(t_address,t_uint256)",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:36"
             },
             {
-              "label": "whitelistedAddresses",
+              "label": "_allowances",
               "offset": 0,
               "slot": "1",
-              "type": "t_array(t_address)dyn_storage",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:25"
+              "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:38"
             },
             {
-              "label": "checkWhiteListAdresses",
+              "label": "_totalSupply",
               "offset": 0,
               "slot": "2",
-              "type": "t_mapping(t_address,t_bool)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:28"
+              "type": "t_uint256",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:40"
             },
             {
-              "label": "deposits",
+              "label": "_name",
               "offset": 0,
               "slot": "3",
-              "type": "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:29"
+              "type": "t_string_storage",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:42"
             },
             {
-              "label": "storageUsed",
+              "label": "_symbol",
               "offset": 0,
               "slot": "4",
-              "type": "t_mapping(t_address,t_struct(Storage)158_storage)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:30"
+              "type": "t_string_storage",
+              "contract": "ERC20",
+              "src": "@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol:43"
             }
           ],
           "types": {
@@ -775,819 +980,21 @@
               "label": "address",
               "numberOfBytes": "20"
             },
-            "t_array(t_address)dyn_storage": {
-              "label": "address[]",
+            "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(address => mapping(address => uint256))",
               "numberOfBytes": "32"
             },
-            "t_array(t_string_storage)dyn_storage": {
-              "label": "string[]",
-              "numberOfBytes": "32"
-            },
-            "t_array(t_struct(Deposit)150_storage)dyn_storage": {
-              "label": "struct DepositManager.Deposit[]",
-              "numberOfBytes": "32"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)": {
-              "label": "mapping(address => struct DepositManager.Deposit[])",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_bool)": {
-              "label": "mapping(address => bool)",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_struct(Storage)158_storage)": {
-              "label": "mapping(address => struct DepositManager.Storage)",
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
               "numberOfBytes": "32"
             },
             "t_string_storage": {
               "label": "string",
               "numberOfBytes": "32"
-            },
-            "t_struct(Deposit)150_storage": {
-              "label": "struct DepositManager.Deposit",
-              "members": [
-                {
-                  "label": "timestamp",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "amount",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "1"
-                },
-                {
-                  "label": "storagePurchased",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "2"
-                }
-              ],
-              "numberOfBytes": "96"
-            },
-            "t_struct(Storage)158_storage": {
-              "label": "struct DepositManager.Storage",
-              "members": [
-                {
-                  "label": "cids",
-                  "type": "t_array(t_string_storage)dyn_storage",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "totalStored",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "1"
-                },
-                {
-                  "label": "availableStorage",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "2"
-                }
-              ],
-              "numberOfBytes": "96"
             },
             "t_uint256": {
               "label": "uint256",
               "numberOfBytes": "32"
-            }
-          },
-          "layoutVersion": "1.1",
-          "flat": true
-        }
-      },
-      "Lighthouse": {
-        "src": "contracts\\lighthouse_test.sol:10",
-        "version": {
-          "withMetadata": "d529567606bb543d351cc931a31557991a929c4cd701daae1688e0291c81486c",
-          "withoutMetadata": "1f9ee8732cbaa90e63be33d85aa82a69c5abd502f9b20b571ce14a30b3de7605",
-          "linkedWithoutMetadata": "1f9ee8732cbaa90e63be33d85aa82a69c5abd502f9b20b571ce14a30b3de7605"
-        },
-        "inherit": [
-          "Ownable",
-          "Context"
-        ],
-        "libraries": [],
-        "methods": [
-          "store(string,string,string,uint256)",
-          "bundleStore(struct Lighthouse.Content[])",
-          "getPaid(uint256,address payable)",
-          "requestStorageStatus(string)",
-          "publishStorageStatus(string,string,bool)",
-          "()",
-          "()"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [
-            {
-              "label": "_owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin\\contracts\\access\\Ownable.sol:21"
-            },
-            {
-              "label": "Deposit",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_contract(DepositManager)449",
-              "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:12"
-            },
-            {
-              "label": "statuses",
-              "offset": 0,
-              "slot": "2",
-              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)477_storage)",
-              "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:42"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_contract(DepositManager)449": {
-              "label": "contract DepositManager",
-              "numberOfBytes": "20"
-            },
-            "t_mapping(t_string_memory_ptr,t_struct(Status)477_storage)": {
-              "label": "mapping(string => struct Lighthouse.Status)",
-              "numberOfBytes": "32"
-            },
-            "t_string_memory_ptr": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_string_storage": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_struct(Status)477_storage": {
-              "label": "struct Lighthouse.Status",
-              "members": [
-                {
-                  "label": "dealIds",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "active",
-                  "type": "t_bool",
-                  "offset": 0,
-                  "slot": "1"
-                }
-              ],
-              "numberOfBytes": "64"
-            }
-          },
-          "layoutVersion": "1.1",
-          "flat": true
-        }
-      }
-    },
-    {
-      "Ownable": {
-        "src": "@openzeppelin\\contracts\\access\\Ownable.sol:20",
-        "inherit": [
-          "Context"
-        ],
-        "libraries": [],
-        "methods": [
-          "owner()",
-          "renounceOwnership()",
-          "transferOwnership(address)"
-        ],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "constructor",
-            "contract": "Ownable",
-            "src": "@openzeppelin\\contracts\\access\\Ownable.sol:28"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "_owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin\\contracts\\access\\Ownable.sol:21"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            }
-          },
-          "layoutVersion": "1.1",
-          "flat": true
-        }
-      },
-      "Context": {
-        "src": "@openzeppelin\\contracts\\utils\\Context.sol:16",
-        "inherit": [],
-        "libraries": [],
-        "methods": [],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.1",
-          "flat": false
-        }
-      },
-      "DepositManager": {
-        "src": "contracts\\DepositManager.sol:5",
-        "version": {
-          "withMetadata": "b8e16dc7a97295df151916d7270c1eb249076890a4d58e4143d272763833b20a",
-          "withoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51",
-          "linkedWithoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51"
-        },
-        "inherit": [],
-        "libraries": [],
-        "methods": [
-          "addDeposit(uint256)",
-          "updateStorage(address,uint256,string)",
-          "updateAvailableStorage(address,uint256,uint256)",
-          "addWhitelistAddress(address)",
-          "removeWhitelistAddress(address)",
-          "listWhitelistAddresses()"
-        ],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "state-variable-assignment",
-            "name": "owner",
-            "src": "contracts\\DepositManager.sol:6"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:6"
-            },
-            {
-              "label": "whitelistedAddresses",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_array(t_address)dyn_storage",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:25"
-            },
-            {
-              "label": "checkWhiteListAdresses",
-              "offset": 0,
-              "slot": "2",
-              "type": "t_mapping(t_address,t_bool)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:28"
-            },
-            {
-              "label": "deposits",
-              "offset": 0,
-              "slot": "3",
-              "type": "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:29"
-            },
-            {
-              "label": "storageUsed",
-              "offset": 0,
-              "slot": "4",
-              "type": "t_mapping(t_address,t_struct(Storage)158_storage)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:30"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_array(t_address)dyn_storage": {
-              "label": "address[]",
-              "numberOfBytes": "32"
-            },
-            "t_array(t_string_storage)dyn_storage": {
-              "label": "string[]",
-              "numberOfBytes": "32"
-            },
-            "t_array(t_struct(Deposit)150_storage)dyn_storage": {
-              "label": "struct DepositManager.Deposit[]",
-              "numberOfBytes": "32"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)": {
-              "label": "mapping(address => struct DepositManager.Deposit[])",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_bool)": {
-              "label": "mapping(address => bool)",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_struct(Storage)158_storage)": {
-              "label": "mapping(address => struct DepositManager.Storage)",
-              "numberOfBytes": "32"
-            },
-            "t_string_storage": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_struct(Deposit)150_storage": {
-              "label": "struct DepositManager.Deposit",
-              "members": [
-                {
-                  "label": "timestamp",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "amount",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "1"
-                },
-                {
-                  "label": "storagePurchased",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "2"
-                }
-              ],
-              "numberOfBytes": "96"
-            },
-            "t_struct(Storage)158_storage": {
-              "label": "struct DepositManager.Storage",
-              "members": [
-                {
-                  "label": "cids",
-                  "type": "t_array(t_string_storage)dyn_storage",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "totalStored",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "1"
-                },
-                {
-                  "label": "availableStorage",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "2"
-                }
-              ],
-              "numberOfBytes": "96"
-            },
-            "t_uint256": {
-              "label": "uint256",
-              "numberOfBytes": "32"
-            }
-          },
-          "layoutVersion": "1.1",
-          "flat": true
-        }
-      },
-      "Lighthouse": {
-        "src": "contracts\\lighthouse_test.sol:10",
-        "version": {
-          "withMetadata": "a5b7d969851a3963da3991fed3ec5ff9caea120b7c7d58b6958d92884487ca94",
-          "withoutMetadata": "e4f792d5f514526ab37afbb1135c7d7756ad61c62bdafea443916f761b2799c7",
-          "linkedWithoutMetadata": "e4f792d5f514526ab37afbb1135c7d7756ad61c62bdafea443916f761b2799c7"
-        },
-        "inherit": [
-          "Ownable",
-          "Context"
-        ],
-        "libraries": [],
-        "methods": [
-          "store(string,string,string,uint256)",
-          "bundleStore(struct Lighthouse.Content[])",
-          "getPaid(uint256,address payable)",
-          "requestStorageStatus(string)",
-          "publishStorageStatus(string,string,bool)",
-          "()",
-          "()"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [
-            {
-              "label": "_owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin\\contracts\\access\\Ownable.sol:21"
-            },
-            {
-              "label": "Deposit",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_contract(DepositManager)449",
-              "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:12"
-            },
-            {
-              "label": "statuses",
-              "offset": 0,
-              "slot": "2",
-              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)477_storage)",
-              "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:42"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_contract(DepositManager)449": {
-              "label": "contract DepositManager",
-              "numberOfBytes": "20"
-            },
-            "t_mapping(t_string_memory_ptr,t_struct(Status)477_storage)": {
-              "label": "mapping(string => struct Lighthouse.Status)",
-              "numberOfBytes": "32"
-            },
-            "t_string_memory_ptr": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_string_storage": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_struct(Status)477_storage": {
-              "label": "struct Lighthouse.Status",
-              "members": [
-                {
-                  "label": "dealIds",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "active",
-                  "type": "t_bool",
-                  "offset": 0,
-                  "slot": "1"
-                }
-              ],
-              "numberOfBytes": "64"
-            }
-          },
-          "layoutVersion": "1.1",
-          "flat": true
-        }
-      }
-    },
-    {
-      "Ownable": {
-        "src": "@openzeppelin\\contracts\\access\\Ownable.sol:20",
-        "inherit": [
-          "Context"
-        ],
-        "libraries": [],
-        "methods": [
-          "owner()",
-          "renounceOwnership()",
-          "transferOwnership(address)"
-        ],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "constructor",
-            "contract": "Ownable",
-            "src": "@openzeppelin\\contracts\\access\\Ownable.sol:28"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "_owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin\\contracts\\access\\Ownable.sol:21"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            }
-          },
-          "layoutVersion": "1.1",
-          "flat": true
-        }
-      },
-      "Context": {
-        "src": "@openzeppelin\\contracts\\utils\\Context.sol:16",
-        "inherit": [],
-        "libraries": [],
-        "methods": [],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [],
-          "types": {},
-          "layoutVersion": "1.1",
-          "flat": false
-        }
-      },
-      "DepositManager": {
-        "src": "contracts\\DepositManager.sol:5",
-        "version": {
-          "withMetadata": "b8e16dc7a97295df151916d7270c1eb249076890a4d58e4143d272763833b20a",
-          "withoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51",
-          "linkedWithoutMetadata": "356f8dbc49f2dd60c72430820b7e340a922f6a6c210313711c6acab4c76d8c51"
-        },
-        "inherit": [],
-        "libraries": [],
-        "methods": [
-          "addDeposit(uint256)",
-          "updateStorage(address,uint256,string)",
-          "updateAvailableStorage(address,uint256,uint256)",
-          "addWhitelistAddress(address)",
-          "removeWhitelistAddress(address)",
-          "listWhitelistAddresses()"
-        ],
-        "linkReferences": [],
-        "errors": [
-          {
-            "kind": "state-variable-assignment",
-            "name": "owner",
-            "src": "contracts\\DepositManager.sol:6"
-          }
-        ],
-        "layout": {
-          "storage": [
-            {
-              "label": "owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:6"
-            },
-            {
-              "label": "whitelistedAddresses",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_array(t_address)dyn_storage",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:25"
-            },
-            {
-              "label": "checkWhiteListAdresses",
-              "offset": 0,
-              "slot": "2",
-              "type": "t_mapping(t_address,t_bool)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:28"
-            },
-            {
-              "label": "deposits",
-              "offset": 0,
-              "slot": "3",
-              "type": "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:29"
-            },
-            {
-              "label": "storageUsed",
-              "offset": 0,
-              "slot": "4",
-              "type": "t_mapping(t_address,t_struct(Storage)158_storage)",
-              "contract": "DepositManager",
-              "src": "contracts\\DepositManager.sol:30"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_array(t_address)dyn_storage": {
-              "label": "address[]",
-              "numberOfBytes": "32"
-            },
-            "t_array(t_string_storage)dyn_storage": {
-              "label": "string[]",
-              "numberOfBytes": "32"
-            },
-            "t_array(t_struct(Deposit)150_storage)dyn_storage": {
-              "label": "struct DepositManager.Deposit[]",
-              "numberOfBytes": "32"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_mapping(t_address,t_array(t_struct(Deposit)150_storage)dyn_storage)": {
-              "label": "mapping(address => struct DepositManager.Deposit[])",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_bool)": {
-              "label": "mapping(address => bool)",
-              "numberOfBytes": "32"
-            },
-            "t_mapping(t_address,t_struct(Storage)158_storage)": {
-              "label": "mapping(address => struct DepositManager.Storage)",
-              "numberOfBytes": "32"
-            },
-            "t_string_storage": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_struct(Deposit)150_storage": {
-              "label": "struct DepositManager.Deposit",
-              "members": [
-                {
-                  "label": "timestamp",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "amount",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "1"
-                },
-                {
-                  "label": "storagePurchased",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "2"
-                }
-              ],
-              "numberOfBytes": "96"
-            },
-            "t_struct(Storage)158_storage": {
-              "label": "struct DepositManager.Storage",
-              "members": [
-                {
-                  "label": "cids",
-                  "type": "t_array(t_string_storage)dyn_storage",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "totalStored",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "1"
-                },
-                {
-                  "label": "availableStorage",
-                  "type": "t_uint256",
-                  "offset": 0,
-                  "slot": "2"
-                }
-              ],
-              "numberOfBytes": "96"
-            },
-            "t_uint256": {
-              "label": "uint256",
-              "numberOfBytes": "32"
-            }
-          },
-          "layoutVersion": "1.1",
-          "flat": true
-        }
-      },
-      "Lighthouse": {
-        "src": "contracts\\lighthouse_test.sol:10",
-        "version": {
-          "withMetadata": "d529567606bb543d351cc931a31557991a929c4cd701daae1688e0291c81486c",
-          "withoutMetadata": "1f9ee8732cbaa90e63be33d85aa82a69c5abd502f9b20b571ce14a30b3de7605",
-          "linkedWithoutMetadata": "1f9ee8732cbaa90e63be33d85aa82a69c5abd502f9b20b571ce14a30b3de7605"
-        },
-        "inherit": [
-          "Ownable",
-          "Context"
-        ],
-        "libraries": [],
-        "methods": [
-          "store(string,string,string,uint256)",
-          "bundleStore(struct Lighthouse.Content[])",
-          "getPaid(uint256,address payable)",
-          "requestStorageStatus(string)",
-          "publishStorageStatus(string,string,bool)",
-          "()",
-          "()"
-        ],
-        "linkReferences": [],
-        "errors": [],
-        "layout": {
-          "storage": [
-            {
-              "label": "_owner",
-              "offset": 0,
-              "slot": "0",
-              "type": "t_address",
-              "contract": "Ownable",
-              "src": "@openzeppelin\\contracts\\access\\Ownable.sol:21"
-            },
-            {
-              "label": "Deposit",
-              "offset": 0,
-              "slot": "1",
-              "type": "t_contract(DepositManager)449",
-              "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:12"
-            },
-            {
-              "label": "statuses",
-              "offset": 0,
-              "slot": "2",
-              "type": "t_mapping(t_string_memory_ptr,t_struct(Status)477_storage)",
-              "contract": "Lighthouse",
-              "src": "contracts\\lighthouse_test.sol:42"
-            }
-          ],
-          "types": {
-            "t_address": {
-              "label": "address",
-              "numberOfBytes": "20"
-            },
-            "t_bool": {
-              "label": "bool",
-              "numberOfBytes": "1"
-            },
-            "t_contract(DepositManager)449": {
-              "label": "contract DepositManager",
-              "numberOfBytes": "20"
-            },
-            "t_mapping(t_string_memory_ptr,t_struct(Status)477_storage)": {
-              "label": "mapping(string => struct Lighthouse.Status)",
-              "numberOfBytes": "32"
-            },
-            "t_string_memory_ptr": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_string_storage": {
-              "label": "string",
-              "numberOfBytes": "32"
-            },
-            "t_struct(Status)477_storage": {
-              "label": "struct Lighthouse.Status",
-              "members": [
-                {
-                  "label": "dealIds",
-                  "type": "t_string_storage",
-                  "offset": 0,
-                  "slot": "0"
-                },
-                {
-                  "label": "active",
-                  "type": "t_bool",
-                  "offset": 0,
-                  "slot": "1"
-                }
-              ],
-              "numberOfBytes": "64"
             }
           },
           "layoutVersion": "1.1",
@@ -1599,7 +1006,7 @@
       "ProviderRegistry": {
         "src": "contracts\\ProviderRegistry.sol:5",
         "version": {
-          "withMetadata": "b1ed5c5fafb08e094548612a226101fc5cc1c1f9794402e20d3bd0655bff468a",
+          "withMetadata": "45e8fe37f376869d3c46d3aba0478b5dd8b12ac206ab74a597a4161cc315f478",
           "withoutMetadata": "b533ca26dd852cf4a9ed516fb53a6fb852b192c9ec19e8331a456c2864f69bb6",
           "linkedWithoutMetadata": "b533ca26dd852cf4a9ed516fb53a6fb852b192c9ec19e8331a456c2864f69bb6"
         },
