@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-let Lighthouse, lighthouse, Deposit, deposit, owner,StableCoin,stableCoin;
+let Lighthouse, lighthouse, Deposit, deposit, owner, StableCoin, stableCoin;
 
 beforeEach(async () => {
   [owner] = await ethers.getSigners();
@@ -16,14 +16,13 @@ beforeEach(async () => {
   StableCoin = await ethers.getContractFactory("Dai");
   stableCoin = await StableCoin.deploy();
 
-  await stableCoin.faucet(owner,1000);
+  await stableCoin.faucet(owner, 1000);
 
   // set the manager of the deposit contract;
 
-  await deposit.addCoin('DAI', stableCoin.address);
+  await deposit.addCoin("DAI", stableCoin.address);
 
   await deposit.changeManager(lighthouse.address);
-
 
   console.log(`Owner Address : ${owner}`);
   console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);
@@ -35,7 +34,7 @@ describe("LighthouseContract", () => {
   //   expect(await lighthouse.owner()).to.equal(owner);
   // });
 
-  // it("Lighthouse Contract should be the manager of the deposit", async() => {
+  // it("Lighthouse Contract should be the manager of the deposit", async () => {
   //   expect(await deposit.manager()).to.equal(lighthouse.address);
   // });
 
@@ -103,18 +102,12 @@ describe("LighthouseContract", () => {
   // });
 
   // it("only Manager or owner could call the updateStoragefunctions", async () => {
-  //   await deposit.updateAvailableStorage(owner,1000);
+  //   await deposit.updateAvailableStorage(owner, 1000);
   // });
 
-  // it("Adding and removing Coins", async () => {
+  // it("Adding and removing Coins", async () => {});
 
+  // it("Adding deposit", async () => {
+  //   await deposit.addDeposit("DAI");
   // });
-
-  // it("Adding deposit", async()=>{
-  //   await deposit.addDeposit('DAI');
-  // });
-
-
-
-
 });
