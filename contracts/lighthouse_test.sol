@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol"; // ownable contract
 
 contract Lighthouse is Ownable {
     DepositManager public Deposit;
+    uint256 bundleStoreID;
 
     constructor(address _deposit) {
         Deposit = DepositManager(_deposit);
@@ -37,7 +38,15 @@ contract Lighthouse is Ownable {
         uint256 timestamp
     );
     event BundleStorageRequest(
+        uint256 indexed id,
         address indexed uploader,
+        Content[] contents,
+        uint256 timestamp
+    );
+    event BundleStorageResponse(
+        uint256 indexed id,
+        bool indexed isSuccess,
+        uint256 count,
         Content[] contents,
         uint256 timestamp
     );
@@ -71,15 +80,49 @@ contract Lighthouse is Ownable {
         payable
         onlyOwner
     {
+        bundleStoreID += 1;
+        Content[] memory failedUpload = new Content[](contents.length);
+        Content[] memory successfulUpload = new Content[](contents.length);
+        uint256 failedCount = 0;
+        uint256 successCount = 0;
         for (uint256 i = 0; i < contents.length; i++) {
-            Deposit.updateStorage(
-                contents[i].user,
-                contents[i].fileSize,
-                contents[i].cid
-            );
+            if (
+                Deposit.getAvailableSpace(contents[i].user) >=
+                contents[i].fileSize
+            ) {
+                Deposit.updateStorage(
+                    contents[i].user,
+                    contents[i].fileSize,
+                    contents[i].cid
+                );
+                successfulUpload[successCount] = contents[i];
+                successCount += 1;
+            } else {
+                failedUpload[failedCount] = contents[i];
+                failedCount += 1;
+            }
         }
 
-        emit BundleStorageRequest(msg.sender, contents, block.timestamp);
+        emit BundleStorageRequest(
+            bundleStoreID,
+            msg.sender,
+            contents,
+            block.timestamp
+        );
+        emit BundleStorageResponse(
+            bundleStoreID,
+            true,
+            successCount,
+            successfulUpload,
+            block.timestamp
+        );
+        emit BundleStorageResponse(
+            bundleStoreID,
+            false,
+            failedCount,
+            failedUpload,
+            block.timestamp
+        );
     }
 
     function getPaid(uint256 amount, address payable recipient)
