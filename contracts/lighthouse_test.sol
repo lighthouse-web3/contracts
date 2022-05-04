@@ -116,13 +116,15 @@ contract Lighthouse is Ownable {
             successfulUpload,
             block.timestamp
         );
-        emit BundleStorageResponse(
-            bundleStoreID,
-            false,
-            failedCount,
-            failedUpload,
-            block.timestamp
-        );
+        if (failedUpload != 0) {
+            emit BundleStorageResponse(
+                bundleStoreID,
+                false,
+                failedCount,
+                failedUpload,
+                block.timestamp
+            );
+        }
     }
 
     function getPaid(uint256 amount, address payable recipient)
