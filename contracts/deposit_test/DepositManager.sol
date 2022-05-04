@@ -63,7 +63,7 @@ contract DepositManager {
             Deposit(block.timestamp, _amount, storagePurchased)
         );
         updateAvailableStorage(msg.sender, storagePurchased);
-        IERC20(_coinAddress).transferFrom(wallet, address(this), _amount);
+        IERC20(_coinAddress).transferFrom(wallet, address(this), _amount);ta
         emit AddDepositEvent(
             msg.sender,
             _coinAddress,
