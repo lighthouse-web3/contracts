@@ -1,10 +1,10 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-let Lighthouse, lighthouse, Deposit, deposit, owner, StableCoin, stableCoin;
+let Lighthouse, lighthouse, Deposit, deposit, owner, StableCoin, stableCoin,account2;
 
 beforeEach(async () => {
-  [owner, seller] = await ethers.getSigners();
+  [owner, account2] = await ethers.getSigners();
   owner = owner.address;
 
   Deposit = await ethers.getContractFactory(
@@ -138,6 +138,19 @@ describe("LighthouseContract", () => {
     } catch (e) {
       expect(e.message).to.equal(
         "VM Exception while processing transaction: reverted with reason string 'coin already disabled'"
+      );
+    }
+  });
+
+
+  it("Approved User Cant call protected Contract", async () => {
+    let tx=await deposit.setWhiteListAddr(account2.address,true)
+    tx=await tx.wait();
+    try{
+    await deposit.connect(account2).updateAvailableStorage(owner, 1000);}
+    catch(err){
+      expect(err.message).to.equal(
+       "VM Exception while processing transaction: reverted with reason string 'Cant be called from User'"
       );
     }
   });
