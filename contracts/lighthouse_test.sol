@@ -118,7 +118,7 @@ contract Lighthouse is Ownable {
             successfulUpload,
             block.timestamp
         );
-        if (failedUpload != 0) {
+        if (failedCount != 0) {
             emit BundleStorageResponse(
                 bundleStoreID,
                 false,
