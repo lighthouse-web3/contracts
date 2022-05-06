@@ -3,10 +3,32 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "hardhat/console.sol";
 
 contract DepositManager {
     using SafeMath for uint256;
+
+    /**
+     * @dev Emitted when a Deposit is made
+     *
+     * Note that `value` may be zero.
+     */
+    event AddDepositEvent(
+        address indexed depositor,
+        address indexed coinAddress,
+        uint256 amount,
+        uint256 rate,
+        uint256 storagePurchased
+    );
+
+    /**
+     * @dev Emitted when an Address is whiteListed Or Unlisted
+     *
+     * Note that `value` may be zero.
+     */
+    event whiteListingAddressEvent(
+        address indexed whitelistAddress,
+        bool indexed status
+    );
 
     address private _owner;
     uint256 public costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
@@ -27,20 +49,6 @@ contract DepositManager {
         uint256 totalStored;
         uint256 availableStorage;
     }
-
-    // Events
-    event AddDepositEvent(
-        address indexed depositor,
-        address indexed coinAddress,
-        uint256 amount,
-        uint256 rate,
-        uint256 storagePurchased
-    );
-
-    event whiteListingAddressEvent(
-        address indexed whitelistAddress,
-        bool indexed status
-    );
 
     constructor() {
         _owner = msg.sender;
@@ -118,7 +126,6 @@ contract DepositManager {
         stableCoinRate[_coinAddress] = rate;
     }
 
-
     /*
      * @dev
      * ```Remove Coin```
@@ -138,7 +145,17 @@ contract DepositManager {
         stableCoinRate[_coinAddress] = 0;
     }
 
-    // update storage
+    /*
+     *  @dev
+     * ```Remove Coin```
+
+     * Args:
+     *  user Address
+     *  fileSize
+     *  file CID
+     *
+     *
+     */
 
     function updateStorage(
         address user,
@@ -185,25 +202,23 @@ contract DepositManager {
         return _owner;
     }
 
-
     /*
-     * @dev 
+     * @dev
      * modifier```ManagerOrOwnerModify```
      *
      * Requirement:
-     * - only callable by owner and approve contracts
      * - Reject direct calls by user
      */
     modifier ManagerorOwner() {
-        if (msg.sender != owner()) {
-            require(tx.origin != msg.sender, "Cant be called from User");
-            require(whiteListedAddr[msg.sender], "Account Not Whitelisted");
-        }
+        require(
+            whiteListedAddr[msg.sender] || msg.sender == owner(),
+            "Account Not Whitelisted"
+        );
         _;
     }
 
     /*
-     * @dev 
+     * @dev
      * modifier```onlyOwner```
      *
      * Requirement:

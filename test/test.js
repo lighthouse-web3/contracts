@@ -1,7 +1,14 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-let Lighthouse, lighthouse, Deposit, deposit, owner, StableCoin, stableCoin,account2;
+let Lighthouse,
+  lighthouse,
+  Deposit,
+  deposit,
+  owner,
+  StableCoin,
+  stableCoin,
+  account2;
 
 beforeEach(async () => {
   [owner, account2] = await ethers.getSigners();
@@ -74,16 +81,16 @@ describe("LighthouseContract", () => {
       1000000000
     );
 
-    const cid_bundles = [...Array(1000).keys()].fill("cid", 0, 1000);
-    const config = [...Array(1000).keys()].fill("config", 0, 1000);
-    const users = [...Array(1000).keys()].fill(
+    const cid_bundles = [...Array(100).keys()].fill("cid", 0, 1000);
+    const config = [...Array(100).keys()].fill("config", 0, 1000);
+    const users = [...Array(100).keys()].fill(
       "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
       0,
       1000
     );
-    const fileName = [...Array(1000).keys()].fill("fileName", 0, 1000);
-    const fileSize = [...Array(1000).keys()];
-    const timestamps = [...Array(1000).keys()];
+    const fileName = [...Array(100).keys()].fill("fileName", 0, 1000);
+    const fileSize = [...Array(100).keys()];
+    const timestamps = [...Array(100).keys()];
 
     const structarr = [];
     // structarr.push([users[0],cid_bundles[0],config[0],fileName[0],fileSize[0],timestamps[0]]);
@@ -142,16 +149,25 @@ describe("LighthouseContract", () => {
     }
   });
 
-
-  it("Approved User Cant call protected Contract", async () => {
-    let tx=await deposit.setWhiteListAddr(account2.address,true)
-    tx=await tx.wait();
-    try{
-    await deposit.connect(account2).updateAvailableStorage(owner, 1000);}
-    catch(err){
+  it("Reject Non Approved Addresses", async () => {
+    try {
+      await deposit.connect(account2).updateAvailableStorage(owner, 1000);
+      throw new Error("Invaild");
+    } catch (err) {
       expect(err.message).to.equal(
-       "VM Exception while processing transaction: reverted with reason string 'Cant be called from User'"
+        "VM Exception while processing transaction: reverted with reason string 'Account Not Whitelisted'"
       );
     }
+  });
+
+  it("Accept whitelisted for contracts Marked with the modifier", async () => {
+    let tx = await deposit.setWhiteListAddr(account2.address, true);
+    tx.wait();
+    tx = await deposit
+      .connect(account2)
+      .updateAvailableStorage(account2.address, 1000);
+    tx.wait();
+    tx = await deposit.getAvailableSpace(account2.address);
+    expect(parseInt(tx)).to.equal(1000);
   });
 });
