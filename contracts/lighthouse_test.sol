@@ -2,16 +2,16 @@
 
 pragma solidity ^0.8.0;
 
-import "./deposit_test/DepositManager.sol";
+import "./deposit_test/IDepositManager.sol";
 import "@openzeppelin/contracts/utils/Context.sol"; // context file
 import "@openzeppelin/contracts/access/Ownable.sol"; // ownable contract
 
 contract Lighthouse is Ownable {
-    DepositManager public Deposit;
+    IDepositManager public Deposit;
     uint256 bundleStoreID;
 
     constructor(address _deposit) {
-        Deposit = DepositManager(_deposit);
+        Deposit = IDepositManager(_deposit);
     }
 
     struct Content {
@@ -59,14 +59,14 @@ contract Lighthouse is Ownable {
         string calldata config,
         string calldata fileName,
         uint256 fileSize
-    ) external payable {
+    ) external {
         uint256 currentTime = block.timestamp;
         Deposit.updateStorage(msg.sender, fileSize, cid);
         emit StorageRequest(
             msg.sender,
             cid,
             config,
-            msg.value,
+            Deposit.costOfStorage() * fileSize,
             fileName,
             fileSize,
             currentTime
@@ -75,11 +75,7 @@ contract Lighthouse is Ownable {
 
     // For Bundle Storage Requests(Transactions)
     // Paramater: content of the stored file i.e includes the address of the user
-    function bundleStore(Content[] calldata contents)
-        external
-        payable
-        onlyOwner
-    {
+    function bundleStore(Content[] calldata contents) external onlyOwner {
         bundleStoreID += 1;
         Content[] memory failedUpload = new Content[](contents.length);
         Content[] memory successfulUpload = new Content[](contents.length);
@@ -125,13 +121,6 @@ contract Lighthouse is Ownable {
                 block.timestamp
             );
         }
-    }
-
-    function getPaid(uint256 amount, address payable recipient)
-        external
-        onlyOwner
-    {
-        recipient.transfer(amount);
     }
 
     function requestStorageStatus(string calldata cid) external {
