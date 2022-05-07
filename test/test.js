@@ -45,16 +45,6 @@ describe("LighthouseContract", () => {
     expect(await lighthouse.owner()).to.equal(owner);
   });
 
-  // it("Lighthouse Contract should be the manager of the deposit", async () => {
-  //   expect(await deposit.manager()).to.equal(lighthouse.address);
-  // });
-
-  // it("Lighthouse contract address should be whitelisted", async () => {
-  //   expect(await deposit.checkWhiteListAdresses(lighthouse.address)).to.equal(
-  //     true
-  //   );
-  // });
-
   it("On each store update the value of data cap", async () => {
     await deposit.updateAvailableStorage(owner, 1000);
     // await deposit.updateStorage(owner, 100, 'abcd');
@@ -65,7 +55,8 @@ describe("LighthouseContract", () => {
       filesize = 100;
     await lighthouse.store(cid, config, filename, filesize);
     const storageUser = await deposit.storageList(owner);
-
+    
+    // @todo test case should check if final available storage is 900
     console.log(` storage information of User : ${storageUser}`);
   });
 
@@ -74,6 +65,9 @@ describe("LighthouseContract", () => {
     var data = await stableCoin.approve(deposit.address, 10);
     data = await data.wait();
     await deposit.addDeposit(stableCoin.address, 10);
+
+    // @todo test should check the balance of the deposit contract after calling this function
+    // @todo make another test which test the new available storage of the user after deposit is complete
   });
   it("checking bundles", async () => {
     await deposit.updateAvailableStorage(
@@ -118,6 +112,8 @@ describe("LighthouseContract", () => {
 
   it("only Manager or owner could call the updateStoragefunctions", async () => {
     await deposit.updateAvailableStorage(owner, 1000);
+    // @todo Make a test for a manager address as well
+    // @todo Make a test for an non mangerOrOwner Address
   });
 
   it("removing Coin and expect failure after coin has been removed", async () => {
@@ -152,7 +148,7 @@ describe("LighthouseContract", () => {
   it("Reject Non Approved Addresses", async () => {
     try {
       await deposit.connect(account2).updateAvailableStorage(owner, 1000);
-      throw new Error("Invaild");
+      throw new Error("Invalid");
     } catch (err) {
       expect(err.message).to.equal(
         "VM Exception while processing transaction: reverted with reason string 'Account Not Whitelisted'"
