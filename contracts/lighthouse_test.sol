@@ -16,7 +16,7 @@ contract Lighthouse is Ownable {
 
     struct Content {
         address user;
-        string cid;
+        bytes32 fileHash;
         string config;
         string fileName;
         uint256 fileSize;
@@ -30,7 +30,7 @@ contract Lighthouse is Ownable {
 
     event StorageRequest(
         address indexed uploader,
-        string cid,
+        bytes32 fileHash,
         string config,
         uint256 fileCost,
         string fileName,
@@ -50,12 +50,12 @@ contract Lighthouse is Ownable {
         Content[] contents,
         uint256 timestamp
     );
-    event StorageStatusRequest(address requester, string cid);
+    event StorageStatusRequest(address requester, bytes32 fileHash);
 
-    mapping(string => Status) public statuses; // address -> cid -> status
+    mapping(bytes32 => Status) public statuses; // cid -> Status
 
     function store(
-        string calldata cid,
+        bytes32 cid,
         string calldata config,
         string calldata fileName,
         uint256 fileSize
@@ -89,7 +89,7 @@ contract Lighthouse is Ownable {
                 Deposit.updateStorage(
                     contents[i].user,
                     contents[i].fileSize,
-                    contents[i].cid
+                    contents[i].fileHash
                 );
                 successfulUpload[successCount] = contents[i];
                 successCount += 1;
@@ -123,12 +123,12 @@ contract Lighthouse is Ownable {
         }
     }
 
-    function requestStorageStatus(string calldata cid) external {
+    function requestStorageStatus(bytes32 cid) external {
         emit StorageStatusRequest(msg.sender, cid);
     }
 
     function publishStorageStatus(
-        string calldata cid,
+        bytes32 cid,
         string calldata dealIds,
         bool active
     ) external onlyOwner {
