@@ -33,6 +33,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "hardhat": "^2.9.2",
+    "solidity-coverage": "^0.7.21",
     "web3": "^1.7.3"
   }
 }

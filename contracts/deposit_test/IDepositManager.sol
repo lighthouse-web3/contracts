@@ -84,7 +84,7 @@ interface IDepositManager {
     function updateStorage(
         address user,
         uint256 filesize,
-        string calldata cid
+        bytes32 cid
     ) external;
 
     /*
@@ -101,5 +101,18 @@ interface IDepositManager {
         view
         returns (uint256);
 
+    /*
+     * @dev
+     * Transfer balance to a designated Account
+     */
+    function transferAmount(
+        address _coinAddress,
+        address wallet,
+        uint256 amount
+    ) external;
+
+    /*
+    @dev get costOfStorage
+    */
     function costOfStorage() external view returns (uint256);
 }

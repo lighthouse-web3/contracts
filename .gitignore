@@ -10,3 +10,4 @@ hardhat.config.js
 hardhat.configv0.js
 yarn.lock
 hardhat.configv1.js
+coverage

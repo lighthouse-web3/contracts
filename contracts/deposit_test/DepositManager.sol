@@ -31,7 +31,7 @@ contract DepositManager {
     );
 
     address private _owner;
-    uint256 public costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
+    uint256 private _costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
 
     mapping(address => Deposit[]) public deposits;
     mapping(address => Storage) public storageList;
@@ -45,7 +45,7 @@ contract DepositManager {
     }
 
     struct Storage {
-        string[] cids;
+        bytes32[] fileHashs;
         uint256 totalStored;
         uint256 availableStorage;
     }
@@ -62,27 +62,27 @@ contract DepositManager {
             IERC20(_coinAddress).balanceOf(wallet) >= _amount,
             "insufficent Balance"
         );
-        uint256 storagePurchased = (IERC20(_coinAddress).balanceOf(wallet))
+        uint256 storagePurchased = _amount
             .mul(stableCoinRate[_coinAddress])
-            .mul(costOfStorage)
+            .mul(costOfStorage())
             .div(10**decimals)
             .div(10**6);
         deposits[msg.sender].push(
             Deposit(block.timestamp, _amount, storagePurchased)
         );
-        updateAvailableStorage(msg.sender, storagePurchased);
+        _updateAvailableStorage(msg.sender, storagePurchased);
         IERC20(_coinAddress).transferFrom(wallet, address(this), _amount);
         emit AddDepositEvent(
             msg.sender,
             _coinAddress,
             _amount,
-            costOfStorage,
+            _costOfStorage,
             storagePurchased
         );
     }
 
     function changeCostOfStorage(uint256 newCost) public onlyOwner {
-        costOfStorage = newCost;
+        _costOfStorage = newCost;
     }
 
     function getAvailableSpace(address _address)
@@ -93,6 +93,10 @@ contract DepositManager {
         return storageList[_address].availableStorage;
     }
 
+    /*
+     * @dev
+     * Transfer balance to a designated Account
+     */
     function transferAmount(
         address _coinAddress,
         address wallet,
@@ -160,9 +164,9 @@ contract DepositManager {
     function updateStorage(
         address user,
         uint256 filesize,
-        string calldata cid
+        bytes32 fileHash
     ) public ManagerorOwner {
-        storageList[user].cids.push(cid);
+        storageList[user].fileHashs.push(fileHash);
         storageList[user].totalStored = storageList[user].totalStored.add(
             filesize
         );
@@ -175,14 +179,19 @@ contract DepositManager {
         public
         ManagerorOwner
     {
-        Storage memory storageUpdate;
-        storageUpdate.availableStorage = storageList[user].availableStorage.add(
-            addOnStorage
-        );
-        storageUpdate.totalStored = storageList[user].totalStored;
-        storageList[user] = storageUpdate;
+        _updateAvailableStorage(user, addOnStorage);
     }
 
+    function _updateAvailableStorage(address user, uint256 addOnStorage)
+        internal
+    {
+        Storage storage storagePointer = storageList[user];
+        storagePointer.availableStorage = storagePointer.availableStorage.add(
+            addOnStorage
+        );
+    }
+
+    /**@dev transfer OwnerShip*/
     function changeOwner(address _newOwner) external onlyOwner {
         _owner = _newOwner;
     }
@@ -200,6 +209,13 @@ contract DepositManager {
      */
     function owner() public view virtual returns (address) {
         return _owner;
+    }
+
+    /**
+     * @dev Returns costOfStorage
+     */
+    function costOfStorage() public view virtual returns (uint256) {
+        return _costOfStorage;
     }
 
     /*
