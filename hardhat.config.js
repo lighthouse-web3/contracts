@@ -33,7 +33,7 @@ task("balance", "Prints an account's balance")
 
     console.log(web3.utils.fromWei(balance, "ether"), "ETH");
   });
-
+ 
 module.exports = {
   // defaultNetwork: "hardhat",
   networks: {
