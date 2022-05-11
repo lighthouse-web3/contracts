@@ -42,6 +42,7 @@ contract Lighthouse is Ownable {
         uint256 indexed id,
         address indexed uploader,
         Content[] contents,
+        bool didAllSuceed,
         uint256 timestamp
     );
     event BundleStorageResponse(
@@ -80,9 +81,7 @@ contract Lighthouse is Ownable {
     function bundleStore(Content[] calldata contents) external onlyOwner {
         bundleStoreID += 1;
         Content[] memory failedUpload = new Content[](contents.length);
-        Content[] memory successfulUpload = new Content[](contents.length);
         uint256 failedCount = 0;
-        uint256 successCount = 0;
         for (uint256 i = 0; i < contents.length; i++) {
             if (
                 Deposit.getAvailableSpace(contents[i].user) >=
@@ -93,8 +92,6 @@ contract Lighthouse is Ownable {
                     contents[i].fileSize,
                     contents[i].fileHash
                 );
-                successfulUpload[successCount] = contents[i];
-                successCount += 1;
             } else {
                 failedUpload[failedCount] = contents[i];
                 failedCount += 1;
@@ -105,13 +102,7 @@ contract Lighthouse is Ownable {
             bundleStoreID,
             msg.sender,
             contents,
-            block.timestamp
-        );
-        emit BundleStorageResponse(
-            bundleStoreID,
-            true,
-            successCount,
-            successfulUpload,
+            failedCount == 0,
             block.timestamp
         );
         if (failedCount != 0) {
