@@ -95,15 +95,15 @@ contract DepositManager {
 
     /*
      * @dev
-     * Transfer balance to a designated Account
+     * ApproveSpender designated Account
      */
-    function transferAmount(
+    function approveSpender(
         address _coinAddress,
         address wallet,
         uint256 amount
     ) external onlyOwner {
         require(amount <= IERC20(_coinAddress).balanceOf(address(this)));
-        IERC20(_coinAddress).transfer(wallet, amount);
+        IERC20(_coinAddress).approve(wallet, amount);
     }
 
     /*
