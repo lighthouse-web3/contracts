@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-contract Lighthouse {
+contract LighthouseV0 {
     address public owner = msg.sender;
 
     struct Content {

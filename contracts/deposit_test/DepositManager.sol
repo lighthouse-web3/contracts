@@ -1,22 +1,42 @@
 // SPDX-License-Identifier: GPL-3.0
-
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract DepositManager {
     using SafeMath for uint256;
 
-    address public owner = msg.sender;
-    address public manager = msg.sender;
-    uint256 public costOfStorage = 5; // 5$/GB
+    /**
+     * @dev Emitted when a Deposit is made
+     *
+     * Note that `value` may be zero.
+     */
+    event AddDepositEvent(
+        address indexed depositor,
+        address indexed coinAddress,
+        uint256 amount,
+        uint256 rate,
+        uint256 storagePurchased
+    );
 
-    string[] public stableCoinsList;
+    /**
+     * @dev Emitted when an Address is whiteListed Or Unlisted
+     *
+     * Note that `value` may be zero.
+     */
+    event whiteListingAddressEvent(
+        address indexed whitelistAddress,
+        bool indexed status
+    );
+
+    address private _owner;
+    uint256 private _costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
 
     mapping(address => Deposit[]) public deposits;
     mapping(address => Storage) public storageList;
-    mapping(string => address) public stableCoins;
+    mapping(address => bool) private whiteListedAddr;
+    mapping(address => uint256) private stableCoinRate;
 
     struct Deposit {
         uint256 timestamp;
@@ -25,99 +45,128 @@ contract DepositManager {
     }
 
     struct Storage {
-        string[] cids;
+        bytes32[] fileHashs;
         uint256 totalStored;
         uint256 availableStorage;
     }
 
-    // Events
-    event AddDeposit(
-        address indexed depositor,
-        uint256 amount,
-        uint256 storagePurchased
-    );
+    constructor() {
+        _owner = msg.sender;
+    }
 
-    function addDeposit(string calldata _coinSymbol) public payable {
+    function addDeposit(address _coinAddress, uint256 _amount) external {
         address wallet = msg.sender;
-
+        uint256 decimals = IERC20Metadata(_coinAddress).decimals();
+        require(stableCoinRate[_coinAddress] != 0, "suggest coin to Admin");
         require(
-            IERC20(stableCoins[_coinSymbol]).balanceOf(wallet) > 0,
-            "Must include deposit > 0"
+            IERC20(_coinAddress).balanceOf(wallet) >= _amount,
+            "insufficent Balance"
         );
-        uint256 storagePurchased = (
-            IERC20(stableCoins[_coinSymbol]).balanceOf(wallet)
-        ).div(costOfStorage);
-
+        uint256 storagePurchased = _amount
+            .mul(stableCoinRate[_coinAddress])
+            .mul(costOfStorage())
+            .div(10**decimals)
+            .div(10**6);
         deposits[msg.sender].push(
-            Deposit(block.timestamp, msg.value, storagePurchased)
+            Deposit(block.timestamp, _amount, storagePurchased)
         );
-
-        updateAvailableStorage(msg.sender, storagePurchased);
-
-        emit AddDeposit(msg.sender, msg.value, storagePurchased);
-
-        // top up storage against the deposit - above event emitted can be used in node
+        _updateAvailableStorage(msg.sender, storagePurchased);
+        IERC20(_coinAddress).transferFrom(wallet, address(this), _amount);
+        emit AddDepositEvent(
+            msg.sender,
+            _coinAddress,
+            _amount,
+            _costOfStorage,
+            storagePurchased
+        );
     }
 
     function changeCostOfStorage(uint256 newCost) public onlyOwner {
-        costOfStorage = newCost;
+        _costOfStorage = newCost;
     }
 
-    function compareStrings(string memory a, string memory b)
-        public
+    function getAvailableSpace(address _address)
+        external
         view
-        returns (bool)
+        returns (uint256)
     {
-        return (keccak256(abi.encodePacked((a))) ==
-            keccak256(abi.encodePacked((b))));
+        return storageList[_address].availableStorage;
     }
 
+    /*
+     * @dev
+     * Transfer balance to a designated Account
+     */
     function transferAmount(
-        string memory _coinSymbol,
+        address _coinAddress,
         address wallet,
         uint256 amount
     ) external onlyOwner {
-        for (uint256 i = 0; i < stableCoinsList.length; i++) {
-            string memory coin = stableCoinsList[i];
-            if (compareStrings(coin, _coinSymbol)) {
-                require(
-                    amount <=
-                        IERC20(stableCoins[_coinSymbol]).balanceOf(
-                            address(this)
-                        )
-                );
-                IERC20(stableCoins[_coinSymbol]).transfer(wallet, amount);
-            }
-        }
+        require(amount <= IERC20(_coinAddress).balanceOf(address(this)));
+        IERC20(_coinAddress).transfer(wallet, amount);
     }
 
-    // adding and removing available stablecoins on the contract.
+    /*
+     * @dev
+     * ```Add Coin```
+     *  Set rate for coins
 
-    function addCoin(string calldata _coinSymbol, address _coinAddress)
-        external
-        onlyOwner
-    {
-        require(stableCoins[_coinSymbol] == address(0), "Coin Already Added");
-        stableCoinsList.push(_coinSymbol);
-        stableCoins[_coinSymbol] = _coinAddress;
+     * Args:
+     * coinAddress on the Network
+     * Rate: kindly see Not below
+     *
+     *
+     * Requirement:
+     * - only callable by owner
+     * - rate can't be set to Zero
+     *
+     * Note: rate is to 6 decimal place
+     *  this implies if rate is @0.992 per $
+     *  rate should be set to 0.992*10^6 = 922000
+     */
+    function addCoin(address _coinAddress, uint256 rate) external onlyOwner {
+        require(_coinAddress != address(0), "Address can't be zero");
+        require(rate != 0, "rate can't be zero");
+        stableCoinRate[_coinAddress] = rate;
     }
 
-    function removeCoin(string calldata _coinSymbol) external onlyOwner {
-        require(
-            stableCoins[_coinSymbol] != address(0),
-            "Coin Already Removed or doesn't exist"
-        );
-        stableCoins[_coinSymbol] = address(0);
+    /*
+     * @dev
+     * ```Remove Coin```
+
+     * Args:
+     * coinAddress on the Network
+     *
+     *
+     * Requirement:
+     * - only callable by owner
+     * - revert if the coinAddress rate is already set to zero
+     *
+     */
+    function removeCoin(address _coinAddress) external onlyOwner {
+        require(_coinAddress != address(0), "Address can't be zero");
+        require(stableCoinRate[_coinAddress] != 0, "coin already disabled");
+        stableCoinRate[_coinAddress] = 0;
     }
 
-    // update storage
+    /*
+     *  @dev
+     * ```Remove Coin```
+
+     * Args:
+     *  user Address
+     *  fileSize
+     *  file CID
+     *
+     *
+     */
 
     function updateStorage(
         address user,
         uint256 filesize,
-        string calldata cid
+        bytes32 fileHash
     ) public ManagerorOwner {
-        storageList[user].cids.push(cid);
+        storageList[user].fileHashs.push(fileHash);
         storageList[user].totalStored = storageList[user].totalStored.add(
             filesize
         );
@@ -130,32 +179,69 @@ contract DepositManager {
         public
         ManagerorOwner
     {
-        Storage memory storageUpdate;
-        storageUpdate.availableStorage = storageList[user].availableStorage.add(
+        _updateAvailableStorage(user, addOnStorage);
+    }
+
+    function _updateAvailableStorage(address user, uint256 addOnStorage)
+        internal
+    {
+        Storage storage storagePointer = storageList[user];
+        storagePointer.availableStorage = storagePointer.availableStorage.add(
             addOnStorage
         );
-        storageUpdate.totalStored = storageList[user].totalStored;
-        storageList[user] = storageUpdate;
     }
 
-    function changeOwner(address _owner) external onlyOwner {
-        owner = _owner;
+    /**@dev transfer OwnerShip*/
+    function changeOwner(address _newOwner) external onlyOwner {
+        _owner = _newOwner;
     }
 
-    function changeManager(address _manager) external ManagerorOwner {
-        manager = _manager;
+    function setWhiteListAddr(address _address, bool _status)
+        external
+        onlyOwner
+    {
+        whiteListedAddr[_address] = _status;
+        emit whiteListingAddressEvent(_address, _status);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner);
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Returns costOfStorage
+     */
+    function costOfStorage() public view virtual returns (uint256) {
+        return _costOfStorage;
+    }
+
+    /*
+     * @dev
+     * modifier```ManagerOrOwnerModify```
+     *
+     * Requirement:
+     * - Reject direct calls by user
+     */
+    modifier ManagerorOwner() {
+        require(
+            whiteListedAddr[msg.sender] || msg.sender == owner(),
+            "Account Not Whitelisted"
+        );
         _;
     }
 
-    modifier ManagerorOwner() {
-        require(
-            (msg.sender == manager) || (msg.sender == owner),
-            "Not Authorised!!!"
-        );
+    /*
+     * @dev
+     * modifier```onlyOwner```
+     *
+     * Requirement:
+     * - only callable by owner
+     */
+    modifier onlyOwner() {
+        require(owner() == msg.sender, "Ownable: caller is not the owner");
         _;
     }
 }

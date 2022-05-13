@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "smart contracts for lighthouse",
   "main": "index.js",
+  "engines": {
+    "node": "^16.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "solhint": "solhint -f table contracts/**/*.sol"
@@ -28,6 +31,9 @@
     "ethers": "^5.6.1"
   },
   "devDependencies": {
-    "hardhat": "^2.9.2"
+    "@nomiclabs/hardhat-web3": "^2.0.0",
+    "hardhat": "^2.9.2",
+    "solidity-coverage": "^0.7.21",
+    "web3": "^1.7.3"
   }
 }
