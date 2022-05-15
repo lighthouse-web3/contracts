@@ -9,6 +9,23 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@aave/core-v3/contracts/interfaces/IPool.sol";
 import "@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol";
 
+interface IMintableERC20 is IERC20{
+      /**
+   * @dev Function to mint tokens
+   * @param value The amount of tokens to mint.
+   * @return A boolean that indicates if the operation was successful.
+   */
+  function mint(uint256 value) external returns (bool);
+
+  /**
+   * @dev Function to mint tokens to address
+   * @param account The account to mint tokens.
+   * @param value The amount of tokens to mint.
+   * @return A boolean that indicates if the operation was successful.
+   */
+  function mint(address account, uint256 value) external returns (bool);
+}
+
 contract LendAssets is Ownable {
     using SafeMath for uint256;
 
@@ -50,21 +67,19 @@ contract LendAssets is Ownable {
         emit Deposit(msg.sender, asset, from, amount, onBehalfOf, referralCode);
     }
 
+
+  function supplyAsset2(address asset, uint256 amount) public payable{
+    IMintableERC20 token = IMintableERC20(asset);
+    token.mint(amount);
+    token.approve(address(POOL), type(uint256).max);
+    POOL.supply(asset, amount, address(this), 0);
+  }
     function withdrawAsset(
         address asset,
-        address from,
         uint256 amount,
-        address onBehalfOf,
-        uint16 referralCode
+        address to
     ) external onlyOwner {
-        /// Transfer from wallet address
-        IERC20(asset).transferFrom(from, address(this), amount);
-
-        /// Approve LendingPool contract to move your DAI
-        IERC20(asset).approve(address(POOL), amount);
-
-        /// Deposit DAI
-        POOL.supply(asset, amount, onBehalfOf, referralCode);
+        POOL.withdraw(asset, amount, to);
 
         emit Withdraw(asset, amount, to);
     }
@@ -75,7 +90,7 @@ contract LendAssets is Ownable {
     {
         require(amount <= payable(address(this)).balance);
         _to.transfer(amount);
-        emit Withdraw(asset, amount, to);
+        emit Withdraw(address(0), amount, _to);
     }
 
     fallback() external payable {}
