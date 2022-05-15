@@ -67,13 +67,6 @@ contract LendAssets is Ownable {
         emit Deposit(msg.sender, asset, from, amount, onBehalfOf, referralCode);
     }
 
-
-  function supplyAsset2(address asset, uint256 amount) public payable{
-    IMintableERC20 token = IMintableERC20(asset);
-    token.mint(amount);
-    token.approve(address(POOL), type(uint256).max);
-    POOL.supply(asset, amount, address(this), 0);
-  }
     function withdrawAsset(
         address asset,
         uint256 amount,
