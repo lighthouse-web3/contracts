@@ -3,7 +3,8 @@
 pragma solidity ^0.8.0;
 
 contract DepositManager {
-    address public owner = msg.sender;
+    address owner = msg.sender;
+    uint256 public costOfStorage = 5; // 5$/GB
 
     modifier onlyOwner() {
         require(msg.sender == owner, "only owner");
@@ -25,7 +26,7 @@ contract DepositManager {
 
     mapping(address => bool) public checkWhiteListAdresses;
     mapping(address => Deposit[]) public deposits;
-    mapping(address => Storage) public storageUsed;
+    mapping(address => Storage) public storageList;
 
     // Events
     event AddDeposit(
@@ -34,12 +35,13 @@ contract DepositManager {
         uint256 storagePurchased
     );
 
-    function addDeposit(uint256 _storagePurchased) public payable {
+    function addDeposit() public payable {
         require(msg.value > 0, "Must include deposit > 0");
+        uint256 storagePurchased = msg.value / costOfStorage; // @todo work on this part
         deposits[msg.sender].push(
-            Deposit(block.timestamp, msg.value, _storagePurchased)
+            Deposit(block.timestamp, msg.value, storagePurchased)
         );
-        emit AddDeposit(msg.sender, msg.value, _storagePurchased);
+        emit AddDeposit(msg.sender, msg.value, storagePurchased);
 
         // top up storage against the deposit - above event emitted can be used in node
     }
@@ -49,12 +51,12 @@ contract DepositManager {
         uint256 filesize,
         string calldata cid
     ) public {
-        storageUsed[user].cids.push(cid);
-        storageUsed[user].totalStored =
-            storageUsed[user].totalStored +
+        storageList[user].cids.push(cid);
+        storageList[user].totalStored =
+            storageList[user].totalStored +
             filesize;
-        storageUsed[user].availableStorage =
-            storageUsed[user].availableStorage -
+        storageList[user].availableStorage =
+            storageList[user].availableStorage -
             filesize;
     }
 
@@ -66,6 +68,10 @@ contract DepositManager {
         Storage memory storageUpdate;
         storageUpdate.availableStorage = _availableStorage;
         storageUpdate.totalStored = _totalStored;
-        storageUsed[user] = storageUpdate;
+        storageList[user] = storageUpdate;
+    }
+
+    function changeCostOfStorage(uint256 newCost) public onlyOwner {
+        costOfStorage = newCost;
     }
 }
