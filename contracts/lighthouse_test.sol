@@ -56,7 +56,7 @@ contract Lighthouse is Ownable {
 
         Deposit.updateStorage(msg.sender, fileSize, cid);
         emit StorageRequest(
-            msg.sender, 
+            msg.sender,
             cid,
             config,
             msg.value,
@@ -68,7 +68,11 @@ contract Lighthouse is Ownable {
 
     // For Bundle Storage Requests(Transactions)
     // Paramater: content of the stored file i.e includes the address of the user
-    function bundleStore(Content[] calldata contents) external payable onlyOwner {
+    function bundleStore(Content[] calldata contents)
+        external
+        payable
+        onlyOwner
+    {
         for (uint256 i = 0; i < contents.length; i++) {
             Deposit.updateStorage(
                 contents[i].user,
