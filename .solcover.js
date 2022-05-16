@@ -1,3 +1,3 @@
 module.exports = {
-    skipFiles: ['Lighthouse.sol',"DepositManager.sol","stablecoins/dai.sol","ProviderRegistry.sol"]
-  };
+  skipFiles: ["stablecoins/dai.sol", "ProviderRegistry.sol"],
+};

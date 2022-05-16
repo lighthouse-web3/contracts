@@ -14,7 +14,7 @@ async function main() {
   const deposit = await Deposit.deploy();
 
   const Lighthouse = await ethers.getContractFactory(
-    "contracts/lighthouse_test.sol:Lighthouse"
+    "contracts/Lighthouse.sol:Lighthouse"
   );
   const lighthouse = await Lighthouse.deploy(deposit.address);
   console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);
