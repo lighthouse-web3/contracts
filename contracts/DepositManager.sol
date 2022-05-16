@@ -48,7 +48,7 @@ contract DepositManager {
         address user,
         uint256 filesize,
         string calldata cid
-    ) public whitelisted(msg.sender) {
+    ) public {
         storageUsed[user].cids.push(cid);
         storageUsed[user].totalStored =
             storageUsed[user].totalStored +
@@ -62,49 +62,10 @@ contract DepositManager {
         address user,
         uint256 _availableStorage,
         uint256 _totalStored
-    ) public whitelisted(msg.sender) {
+    ) public {
         Storage memory storageUpdate;
         storageUpdate.availableStorage = _availableStorage;
         storageUpdate.totalStored = _totalStored;
-
         storageUsed[user] = storageUpdate;
-    }
-
-    function addWhitelistAddress(address addr) public onlyOwner {
-        whitelistedAddresses.push(addr);
-        checkWhiteListAdresses[addr] = true;
-    }
-
-    function removeWhitelistAddress(address addr) public onlyOwner {
-        uint256 index = 0;
-        for (index = 0; index < whitelistedAddresses.length; index++) {
-            if (whitelistedAddresses[index] == addr) {
-                break;
-            }
-        }
-
-        for (uint256 i = index; i < whitelistedAddresses.length - 1; i++) {
-            whitelistedAddresses[i] = whitelistedAddresses[i + 1];
-        }
-        whitelistedAddresses.pop();
-        checkWhiteListAdresses[addr] = false;
-    }
-
-    function listWhitelistAddresses() public view returns (address[] memory) {
-        address[] memory addressList = new address[](
-            whitelistedAddresses.length
-        );
-        for (uint256 i = 0; i < whitelistedAddresses.length; i++) {
-            addressList[i] = whitelistedAddresses[i];
-        }
-        return addressList;
-    }
-
-    modifier whitelisted(address user) {
-        require(
-            checkWhiteListAdresses[user] == true,
-            "Address is not a whitelisted address"
-        );
-        _;
     }
 }
