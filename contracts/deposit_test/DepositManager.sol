@@ -3,12 +3,13 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "hardhat/console.sol";
 
 contract DepositManager {
     using SafeMath for uint256;
 
     address private _owner;
-    uint256 public costOfStorage = 5; // 5$/GB
+uint256 public costOfStorage = (1000**3) / 50; // Byte per Dollar in these case 1gb/50$
 
     mapping(address => Deposit[]) public deposits;
     mapping(address => Storage) public storageList;
@@ -52,35 +53,33 @@ contract DepositManager {
             IERC20(_coinAddress).balanceOf(wallet) >= _amount,
             "insufficent Balance"
         );
-        uint256 rate = (stableCoinRate[_coinAddress]).div(10**6).div(
-            costOfStorage
-        );
-        uint256 storagePurchased = (IERC20(_coinAddress).balanceOf(wallet)).mul(
-            rate
-        );
+        uint256 storagePurchased = (IERC20(_coinAddress).balanceOf(wallet))
+            .mul(stableCoinRate[_coinAddress])
+            .mul(costOfStorage)
+            .div(10**6);
         deposits[msg.sender].push(
             Deposit(block.timestamp, _amount, storagePurchased)
         );
-
         updateAvailableStorage(msg.sender, storagePurchased);
-
         IERC20(_coinAddress).transferFrom(wallet, address(this), _amount);
         emit AddDepositEvent(
             msg.sender,
             _coinAddress,
             _amount,
-            rate,
+            costOfStorage,
             storagePurchased
         );
-
-        // top up storage against the deposit - above event emitted can be used in node
     }
 
     function changeCostOfStorage(uint256 newCost) public onlyOwner {
         costOfStorage = newCost;
     }
 
-    function getAvailableSpace(address _address) external view returns (uint256) {
+    function getAvailableSpace(address _address)
+        external
+        view
+        returns (uint256)
+    {
         return storageList[_address].availableStorage;
     }
 
@@ -94,10 +93,10 @@ contract DepositManager {
     }
 
     /**
-     * @dev See
+     * @dev
+     * ```Add Coin```
+     *  This function
      *
-     * whiteList an Address
-     * Update SeedFund and Caller's Share
      * Note: rate is to 6 decimal place
      *  this implies if rate is set to
      *  1   is 1/10^6

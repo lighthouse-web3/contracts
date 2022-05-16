@@ -4,7 +4,7 @@ const { ethers } = require("hardhat");
 let Lighthouse, lighthouse, Deposit, deposit, owner, StableCoin, stableCoin;
 
 beforeEach(async () => {
-  [owner] = await ethers.getSigners();
+  [owner, seller] = await ethers.getSigners();
   owner = owner.address;
 
   Deposit = await ethers.getContractFactory(
@@ -24,9 +24,9 @@ beforeEach(async () => {
 
   // set the manager of the deposit contract;
 
-  await deposit.addCoin("DAI", stableCoin.address);
+  await deposit.addCoin(stableCoin.address, 10 ** 6);
 
-  await deposit.changeManager(lighthouse.address);
+  await deposit.setWhiteListAddr(lighthouse.address, true);
 
   console.log(`Owner Address : ${owner}`);
   console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);
@@ -38,9 +38,9 @@ describe("LighthouseContract", () => {
     expect(await lighthouse.owner()).to.equal(owner);
   });
 
-  it("Lighthouse Contract should be the manager of the deposit", async () => {
-    expect(await deposit.manager()).to.equal(lighthouse.address);
-  });
+  // it("Lighthouse Contract should be the manager of the deposit", async () => {
+  //   expect(await deposit.manager()).to.equal(lighthouse.address);
+  // });
 
   // it("Lighthouse contract address should be whitelisted", async () => {
   //   expect(await deposit.checkWhiteListAdresses(lighthouse.address)).to.equal(
@@ -62,6 +62,12 @@ describe("LighthouseContract", () => {
     console.log(` storage information of User : ${storageUser}`);
   });
 
+  it("Adding deposit", async () => {
+    //approve coins
+    var data = await stableCoin.approve(deposit.address, 10);
+    data = await data.wait();
+    await deposit.addDeposit(stableCoin.address, 10);
+  });
   it("checking bundles", async () => {
     await deposit.updateAvailableStorage(
       "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
@@ -95,10 +101,8 @@ describe("LighthouseContract", () => {
         timestamps[i],
       ]);
     }
-    console.log(structarr);
     let chunk = 100;
     const length = structarr.length;
-    console.log(length);
     for (let i = 0; i < length; i += chunk) {
       const chunkarr = structarr.slice(i, i + chunk);
       await lighthouse.bundleStore(chunkarr);
@@ -109,9 +113,32 @@ describe("LighthouseContract", () => {
     await deposit.updateAvailableStorage(owner, 1000);
   });
 
-  it("Adding and removing Coins", async () => {});
+  it("removing Coin and expect failure after coin has been removed", async () => {
+    var data = await deposit.removeCoin(stableCoin.address);
+    data = await data.wait();
+    //approve coins
+    try {
+      data = await stableCoin.approve(deposit.address, 10);
+      data = await data.wait();
+      data = await deposit.addDeposit(stableCoin.address, 10);
+    } catch (e) {
+      expect(e.message).to.equal(
+        "VM Exception while processing transaction: reverted with reason string 'suggest coin to Admin'"
+      );
+    }
+  });
 
-  it("Adding deposit", async () => {
-    await deposit.addDeposit("DAI");
+  it("removing Coin and expect failure on duplicate removal", async () => {
+    var data = await deposit.removeCoin(stableCoin.address);
+    data = await data.wait();
+    //approve coins
+    try {
+      var data = await deposit.removeCoin(stableCoin.address);
+      data = await data.wait();
+    } catch (e) {
+      expect(e.message).to.equal(
+        "VM Exception while processing transaction: reverted with reason string 'coin already disabled'"
+      );
+    }
   });
 });
