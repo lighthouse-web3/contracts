@@ -239,18 +239,22 @@ describe("LighthouseContract", () => {
   });
 
   it("Transfer Tokens Out of the contract", async () => {
-    let mintData = ethers.utils.parseUnits("1000", "ether");
-    let tx = await stableCoin.faucet(deposit.address, mintData);
+    let mintAmount = ethers.utils.parseUnits("1000", "ether");
+    let tx = await stableCoin.faucet(deposit.address, mintAmount);
     await tx.wait();
     let data = await stableCoin.balanceOf(deposit.address);
 
-    expect(data).to.equal(mintData);
+    expect(data).to.equal(mintAmount);
 
-    data = await deposit.transferAmount(
+    data = await deposit.approveSpender(
       stableCoin.address,
       account4.address,
-      mintData
+      mintAmount
     );
+    tx = await stableCoin
+      .connect(account4)
+      .transferFrom(deposit.address, account4.address, mintAmount);
+    await tx.wait();
 
     data = await stableCoin.balanceOf(deposit.address);
 
