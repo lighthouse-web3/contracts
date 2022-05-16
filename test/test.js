@@ -21,12 +21,12 @@ beforeEach(async () => {
   owner = owner.address;
 
   Deposit = await ethers.getContractFactory(
-    "contracts/deposit_test/DepositManager.sol:DepositManager"
+    "contracts/DepositManager.sol:DepositManager"
   );
   deposit = await Deposit.deploy();
 
   Lighthouse = await ethers.getContractFactory(
-    "contracts/lighthouse_test.sol:Lighthouse"
+    "contracts/Lighthouse.sol:Lighthouse"
   );
   lighthouse = await Lighthouse.deploy(deposit.address);
 
@@ -268,10 +268,7 @@ describe("LighthouseContract", () => {
       tx = await deposit.changeOwner(account4.address);
       await tx.wait();
     } catch (e) {
-      expect(e.message).to.include(
-        "Ownable: caller is not the owner"
-      );
+      expect(e.message).to.include("Ownable: caller is not the owner");
     }
-
   });
 });
