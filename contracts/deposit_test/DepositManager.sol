@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0
-
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -8,15 +7,13 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 contract DepositManager {
     using SafeMath for uint256;
 
-    address public owner = msg.sender;
-    address public manager = msg.sender;
+    address private _owner;
     uint256 public costOfStorage = 5; // 5$/GB
-
-    string[] public stableCoinsList;
 
     mapping(address => Deposit[]) public deposits;
     mapping(address => Storage) public storageList;
-    mapping(string => address) public stableCoins;
+    mapping(address => bool) private whiteListedAddr;
+    mapping(address => uint256) private stableCoinRate;
 
     struct Deposit {
         uint256 timestamp;
@@ -31,30 +28,50 @@ contract DepositManager {
     }
 
     // Events
-    event AddDeposit(
+    event AddDepositEvent(
         address indexed depositor,
+        address indexed coinAddress,
         uint256 amount,
+        uint256 rate,
         uint256 storagePurchased
     );
 
-    function addDeposit(string calldata _coinSymbol) public payable {
+    event whiteListingAddressEvent(
+        address indexed whitelistAddress,
+        bool indexed status
+    );
+
+    constructor() {
+        _owner = msg.sender;
+    }
+
+    function addDeposit(address _coinAddress, uint256 _amount) external {
         address wallet = msg.sender;
-
+        require(stableCoinRate[_coinAddress] != 0, "suggest coin to Admin");
         require(
-            IERC20(stableCoins[_coinSymbol]).balanceOf(wallet) > 0,
-            "Must include deposit > 0"
+            IERC20(_coinAddress).balanceOf(wallet) >= _amount,
+            "insufficent Balance"
         );
-        uint256 storagePurchased = (
-            IERC20(stableCoins[_coinSymbol]).balanceOf(wallet)
-        ).div(costOfStorage);
-
+        uint256 rate = (stableCoinRate[_coinAddress]).div(10**6).div(
+            costOfStorage
+        );
+        uint256 storagePurchased = (IERC20(_coinAddress).balanceOf(wallet)).mul(
+            rate
+        );
         deposits[msg.sender].push(
-            Deposit(block.timestamp, msg.value, storagePurchased)
+            Deposit(block.timestamp, _amount, storagePurchased)
         );
 
         updateAvailableStorage(msg.sender, storagePurchased);
 
-        emit AddDeposit(msg.sender, msg.value, storagePurchased);
+        IERC20(_coinAddress).transferFrom(wallet, address(this), _amount);
+        emit AddDepositEvent(
+            msg.sender,
+            _coinAddress,
+            _amount,
+            rate,
+            storagePurchased
+        );
 
         // top up storage against the deposit - above event emitted can be used in node
     }
@@ -63,51 +80,39 @@ contract DepositManager {
         costOfStorage = newCost;
     }
 
-    function compareStrings(string memory a, string memory b)
-        public
-        view
-        returns (bool)
-    {
-        return (keccak256(abi.encodePacked((a))) ==
-            keccak256(abi.encodePacked((b))));
+    function getAvailableSpace(address _address) external view returns (uint256) {
+        return storageList[_address].availableStorage;
     }
 
     function transferAmount(
-        string memory _coinSymbol,
+        address _coinAddress,
         address wallet,
         uint256 amount
     ) external onlyOwner {
-        for (uint256 i = 0; i < stableCoinsList.length; i++) {
-            string memory coin = stableCoinsList[i];
-            if (compareStrings(coin, _coinSymbol)) {
-                require(
-                    amount <=
-                        IERC20(stableCoins[_coinSymbol]).balanceOf(
-                            address(this)
-                        )
-                );
-                IERC20(stableCoins[_coinSymbol]).transfer(wallet, amount);
-            }
-        }
+        require(amount <= IERC20(_coinAddress).balanceOf(address(this)));
+        IERC20(_coinAddress).transfer(wallet, amount);
     }
 
-    // adding and removing available stablecoins on the contract.
-
-    function addCoin(string calldata _coinSymbol, address _coinAddress)
-        external
-        onlyOwner
-    {
-        require(stableCoins[_coinSymbol] == address(0), "Coin Already Added");
-        stableCoinsList.push(_coinSymbol);
-        stableCoins[_coinSymbol] = _coinAddress;
+    /**
+     * @dev See
+     *
+     * whiteList an Address
+     * Update SeedFund and Caller's Share
+     * Note: rate is to 6 decimal place
+     *  this implies if rate is set to
+     *  1   is 1/10^6
+     *  10^6  is 1
+     */
+    function addCoin(address _coinAddress, uint256 rate) external onlyOwner {
+        require(_coinAddress != address(0), "Address can't be zero");
+        require(rate != 0, "rate can't be zero");
+        stableCoinRate[_coinAddress] = rate;
     }
 
-    function removeCoin(string calldata _coinSymbol) external onlyOwner {
-        require(
-            stableCoins[_coinSymbol] != address(0),
-            "Coin Already Removed or doesn't exist"
-        );
-        stableCoins[_coinSymbol] = address(0);
+    function removeCoin(address _coinAddress) external onlyOwner {
+        require(_coinAddress != address(0), "Address can't be zero");
+        require(stableCoinRate[_coinAddress] != 0, "coin already disabled");
+        stableCoinRate[_coinAddress] = 0;
     }
 
     // update storage
@@ -138,24 +143,34 @@ contract DepositManager {
         storageList[user] = storageUpdate;
     }
 
-    function changeOwner(address _owner) external onlyOwner {
-        owner = _owner;
+    function changeOwner(address _newOwner) external onlyOwner {
+        _owner = _newOwner;
     }
 
-    function changeManager(address _manager) external ManagerorOwner {
-        manager = _manager;
+    function setWhiteListAddr(address _address, bool _status)
+        external
+        onlyOwner
+    {
+        whiteListedAddr[_address] = _status;
+        emit whiteListingAddressEvent(_address, _status);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view virtual returns (address) {
+        return _owner;
     }
 
     modifier ManagerorOwner() {
-        require(
-            (msg.sender == manager) || (msg.sender == owner),
-            "Not Authorised!!!"
-        );
+        if (msg.sender != owner()) {
+            require(tx.origin != msg.sender, "Cant be called from User");
+            require(whiteListedAddr[msg.sender], "Account Not Whitelisted");
+        }
+        _;
+    }
+    modifier onlyOwner() {
+        require(owner() == msg.sender, "Ownable: caller is not the owner");
         _;
     }
 }
