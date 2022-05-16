@@ -27,7 +27,6 @@ contract Lighthouse {
         uint256 fileSize,
         uint256 timestamp
     );
-
     event StorageStatusRequest(address requester, string cid);
 
     mapping(string => Status) public statuses; // address -> cid -> status
@@ -51,7 +50,11 @@ contract Lighthouse {
     }
 
     function getPaid(uint256 amount, address payable recipient) external {
+<<<<<<< HEAD
         require(msg.sender == owner, "only owner");
+=======
+        require(msg.sender == owner);
+>>>>>>> 10b33d1 (formatting)
         recipient.transfer(amount);
     }
 
@@ -65,7 +68,11 @@ contract Lighthouse {
         bool active
     ) external {
         // restrict it to only to the owner address
+<<<<<<< HEAD
         require(msg.sender == owner, "only owner");
+=======
+        require(msg.sender == owner);
+>>>>>>> 10b33d1 (formatting)
         statuses[cid] = Status(dealIds, active);
     }
 

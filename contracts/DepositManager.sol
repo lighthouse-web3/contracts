@@ -21,18 +21,11 @@ contract DepositManager {
         uint256 totalStored;
         uint256 availableStorage;
     }
-
     address[] public whitelistedAddresses;
 
-<<<<<<< HEAD
+    mapping(address => bool) public checkWhiteListAdresses;
     mapping(address => Deposit[]) public deposits;
     mapping(address => Storage) public storageUsed;
-=======
-
-    mapping(address=> bool) public checkWhiteListAdresses;
-    mapping (address => Deposit[]) public deposits;
-    mapping (address => Storage) public storageUsed;
->>>>>>> 2e5d142 (testfilesbundles)
 
     // Events
     event AddDeposit(
@@ -51,19 +44,25 @@ contract DepositManager {
         // top up storage against the deposit - above event emitted can be used in node
     }
 
-    function updateStorage(address user, uint256 filesize, string memory cid)
-    public 
-    whitelisted(msg.sender) 
-    {
+    function updateStorage(
+        address user,
+        uint256 filesize,
+        string memory cid
+    ) public whitelisted(msg.sender) {
         storageUsed[user].cids.push(cid);
-        storageUsed[user].totalStored = storageUsed[user].totalStored + filesize;
-        storageUsed[user].availableStorage = storageUsed[user].availableStorage - filesize;
+        storageUsed[user].totalStored =
+            storageUsed[user].totalStored +
+            filesize;
+        storageUsed[user].availableStorage =
+            storageUsed[user].availableStorage -
+            filesize;
     }
 
-    function updateAvailableStorage(address user, uint256 _availableStorage, uint256 _totalStored)
-    public 
-    whitelisted(msg.sender)
-    {
+    function updateAvailableStorage(
+        address user,
+        uint256 _availableStorage,
+        uint256 _totalStored
+    ) public whitelisted(msg.sender) {
         Storage memory storageUpdate;
         storageUpdate.availableStorage = _availableStorage;
         storageUpdate.totalStored = _totalStored;
@@ -84,13 +83,8 @@ contract DepositManager {
             }
         }
 
-<<<<<<< HEAD
         for (uint256 i = index; i < whitelistedAddresses.length - 1; i++) {
             whitelistedAddresses[i] = whitelistedAddresses[i + 1];
-=======
-        for (uint i = index; i < whitelistedAddresses.length-1; i++) {
-            whitelistedAddresses[i] = whitelistedAddresses[i+1];
->>>>>>> 2e5d142 (testfilesbundles)
         }
         whitelistedAddresses.pop();
         checkWhiteListAdresses[addr] = false;
@@ -107,7 +101,10 @@ contract DepositManager {
     }
 
     modifier whitelisted(address user) {
-        require(checkWhiteListAdresses[user] == true, "Address is not a whitelisted address");
+        require(
+            checkWhiteListAdresses[user] == true,
+            "Address is not a whitelisted address"
+        );
         _;
     }
 }
