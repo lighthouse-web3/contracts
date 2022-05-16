@@ -1,6 +1,6 @@
 // SPDX-License-Identifier:MIT
 
-pragma solidity >=0.5.8 <0.8.0;
+pragma solidity ^0.8.0;
 
 import "./deposit_test/DepositManager.sol";
 import "@openzeppelin/contracts/utils/Context.sol"; // context file
@@ -37,13 +37,11 @@ contract Lighthouse is Ownable {
         uint256 fileSize,
         uint256 timestamp
     );
-
     event BundleStorageRequest(
         address indexed uploader,
         Content[] contents,
         uint256 timestamp
     );
-
     event StorageStatusRequest(address requester, string cid);
 
     mapping(string => Status) public statuses; // address -> cid -> status
@@ -55,10 +53,8 @@ contract Lighthouse is Ownable {
         uint256 fileSize
     ) external payable {
         uint256 currentTime = block.timestamp;
-<<<<<<< HEAD
-=======
+
         Deposit.updateStorage(msg.sender, fileSize, cid);
->>>>>>> d3bd520 (stablecoins)
         emit StorageRequest(
             msg.sender, 
             cid,
