@@ -1,10 +1,49 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "D:\\lthouse\\contracts\\contracts\\DepositManager.sol": {
-      "lastModificationDate": 1649256403193,
-      "contentHash": "d0a7915aac498b6b1ade866bd4e977be",
-      "sourceName": "contracts/DepositManager.sol",
+    "D:\\lthouse\\contracts\\contracts\\deposit_test\\DepositManager.sol": {
+      "lastModificationDate": 1650640652478,
+      "contentHash": "e5df91c4222c448363142cc30236e15e",
+      "sourceName": "contracts/deposit_test/DepositManager.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/utils/math/SafeMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "DepositManager"
+      ]
+    },
+    "D:\\lthouse\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\IERC20.sol": {
+      "lastModificationDate": 1649146723653,
+      "contentHash": "a44d1a099633876550ad2476b21bafbe",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
       "solcConfig": {
         "version": "0.8.4",
         "settings": {
@@ -34,12 +73,48 @@
         "^0.8.0"
       ],
       "artifacts": [
-        "DepositManager"
+        "IERC20"
+      ]
+    },
+    "D:\\lthouse\\contracts\\node_modules\\@openzeppelin\\contracts\\utils\\math\\SafeMath.sol": {
+      "lastModificationDate": 1649146724128,
+      "contentHash": "a6a9d6c1f662e922b82c1ba4d81cdd48",
+      "sourceName": "@openzeppelin/contracts/utils/math/SafeMath.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SafeMath"
       ]
     },
     "D:\\lthouse\\contracts\\contracts\\lighthouse_test.sol": {
-      "lastModificationDate": 1649262575606,
-      "contentHash": "dcd9ea1b3120d7198a6a377fd94469a8",
+      "lastModificationDate": 1650639909484,
+      "contentHash": "41e3534553a28d45e5582516c1298fd9",
       "sourceName": "contracts/lighthouse_test.sol",
       "solcConfig": {
         "version": "0.8.4",
@@ -66,7 +141,7 @@
         }
       },
       "imports": [
-        "./DepositManager.sol",
+        "./deposit_test/DepositManager.sol",
         "@openzeppelin/contracts/utils/Context.sol",
         "@openzeppelin/contracts/access/Ownable.sol"
       ],
@@ -151,9 +226,125 @@
         "Ownable"
       ]
     },
+    "D:\\lthouse\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol": {
+      "lastModificationDate": 1649146722294,
+      "contentHash": "bab063ddd80e9cc9e313361fef7ef07f",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC20.sol",
+        "./extensions/IERC20Metadata.sol",
+        "../../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ERC20"
+      ]
+    },
+    "D:\\lthouse\\contracts\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\extensions\\IERC20Metadata.sol": {
+      "lastModificationDate": 1649146723706,
+      "contentHash": "909ab67fc5c25033fe6cd364f8c056f9",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20Metadata"
+      ]
+    },
+    "D:\\lthouse\\contracts\\contracts\\stablecoins\\Dai.sol": {
+      "lastModificationDate": 1650638955223,
+      "contentHash": "4b07632077116e75ad4faa41e239d6ca",
+      "sourceName": "contracts/stablecoins/Dai.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Dai"
+      ]
+    },
     "D:\\lthouse\\contracts\\contracts\\ProviderRegistry.sol": {
-      "lastModificationDate": 1649255513689,
-      "contentHash": "e5fe2f6a1b607549200ec577dd486b1c",
+      "lastModificationDate": 1649697051880,
+      "contentHash": "53fb99528549861fbbaff703c0ebca83",
       "sourceName": "contracts/ProviderRegistry.sol",
       "solcConfig": {
         "version": "0.7.0",
