@@ -12,3 +12,7 @@ yarn.lock
 hardhat.configv1.js
 coverage
 Pipfile
+typechain-types
+deployments
+.gitignore
+gas-report.txt
