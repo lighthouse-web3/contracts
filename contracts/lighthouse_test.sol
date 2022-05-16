@@ -6,7 +6,19 @@ import "./DepositManager.sol";
 import "@openzeppelin/contracts/utils/Context.sol"; // context file
 import "@openzeppelin/contracts/access/Ownable.sol"; // ownable contract
 
+<<<<<<< HEAD
 contract Lighthouse is Ownable {
+=======
+
+contract Lighthouse is Ownable {
+
+    DepositManager public Deposit;
+
+    constructor(address _deposit){
+        Deposit= DepositManager(_deposit);
+    }
+
+>>>>>>> 2e5d142 (testfilesbundles)
     struct Content {
         address user;
         string cid;
@@ -41,6 +53,7 @@ contract Lighthouse is Ownable {
     mapping(string => Status) public statuses; // address -> cid -> status
 
     function store(
+<<<<<<< HEAD
         string calldata cid,
         string calldata config,
         string calldata fileName,
@@ -62,6 +75,33 @@ contract Lighthouse is Ownable {
     // Paramater: content of the stored file i.e includes the address of the user
     function bundleStore(Content[] memory contents) external payable onlyOwner {
         emit BundleStorageRequest(msg.sender, contents, block.timestamp);
+=======
+        string calldata cid, 
+        string calldata config, 
+        string calldata fileName, 
+        uint256 fileSize
+    )
+        external
+        payable
+    {
+        uint256 currentTime = block.timestamp;
+        Deposit.updateStorage(msg.sender, fileSize, cid);
+        emit StorageRequest(msg.sender, cid, config, msg.value, fileName, fileSize, currentTime);
+    }
+
+    // For Bundle Storage Requests(Transactions) 
+    // Paramater: content of the stored file i.e includes the address of the user 
+    function bundleStore(Content[] memory contents)
+        external
+        payable
+        onlyOwner 
+    {
+        for(uint256 i=0;i < contents.length;i++) {
+            Deposit.updateStorage(contents[i].user, contents[i].fileSize, contents[i].cid);
+        }
+
+        emit BundleStorageRequest(msg.sender,contents,block.timestamp);
+>>>>>>> 2e5d142 (testfilesbundles)
     }
 
     function getPaid(uint256 amount, address payable recipient)
