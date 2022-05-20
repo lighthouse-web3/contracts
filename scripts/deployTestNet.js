@@ -9,12 +9,12 @@ async function main() {
   console.log(`Acccount Balance: ${balance.toString()}`);
 
   const Deposit = await ethers.getContractFactory(
-    "contracts/deposit_test/DepositManager.sol:DepositManager"
+    "DepositManager"
   );
   const deposit = await Deposit.deploy();
 
   const Lighthouse = await ethers.getContractFactory(
-    "contracts/Lighthouse.sol:Lighthouse"
+    "Lighthouse"
   );
   const lighthouse = await Lighthouse.deploy(deposit.address);
   console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);

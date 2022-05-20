@@ -16,3 +16,5 @@ typechain-types
 deployments
 .gitignore
 gas-report.txt
+scripts/setupPurchaseStorage.js
+scripts/setupStableCoin.js

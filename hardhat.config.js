@@ -67,6 +67,13 @@ module.exports = {
       //     mnemonic: MNEMONIC,
       // }
     },
+    fantomTest: {
+      url: "https://rpc.ankr.com/fantom_testnet/",
+      accounts: [PRIVATE_KEY],
+      // accounts: {
+      //     mnemonic: MNEMONIC,
+      // }
+    },
     mainnet: {
       url: MAINNET_RPC_URL,
       accounts: [PRIVATE_KEY],
