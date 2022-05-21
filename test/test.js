@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 const crypto = require("crypto");
 
 let Lighthouse,
@@ -23,12 +23,16 @@ beforeEach(async () => {
   Deposit = await ethers.getContractFactory(
     "contracts/DepositManager.sol:DepositManager"
   );
-  deposit = await Deposit.deploy();
+  deposit = await upgrades.deployProxy(Deposit, { kind: "uups" });
 
   Lighthouse = await ethers.getContractFactory(
     "contracts/Lighthouse.sol:Lighthouse"
   );
-  lighthouse = await Lighthouse.deploy(deposit.address);
+  lighthouse = await upgrades.deployProxy(
+    Lighthouse,
+    [deposit.address],
+    { kind: "uups", }
+  );
 
   StableCoin = await ethers.getContractFactory("Dai");
   stableCoin = await StableCoin.deploy();
@@ -269,20 +273,5 @@ describe("LighthouseContract", () => {
     data = await stableCoin.balanceOf(deposit.address);
 
     expect(data).to.equal(0);
-  });
-
-  it("Transfer OwnerShip", async () => {
-    let tx = await deposit.changeOwner(account3.address);
-    await tx.wait();
-
-    let data = await deposit.owner();
-    expect(data).to.equal(account3.address);
-
-    try {
-      tx = await deposit.changeOwner(account4.address);
-      await tx.wait();
-    } catch (e) {
-      expect(e.message).to.include("Ownable: caller is not the owner");
-    }
   });
 });

@@ -3,16 +3,15 @@
 pragma solidity ^0.8.0;
 
 import "./IDepositManager.sol";
-import "@openzeppelin/contracts/utils/Context.sol"; // context file
-import "@openzeppelin/contracts/access/Ownable.sol"; // ownable contract
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract Lighthouse is Ownable {
+
+contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
+
     IDepositManager public Deposit;
     uint256 bundleStoreID;
-
-    constructor(address _deposit) {
-        Deposit = IDepositManager(_deposit);
-    }
 
     struct Content {
         address user;
@@ -54,6 +53,13 @@ contract Lighthouse is Ownable {
     event StorageStatusRequest(address requester, bytes32 fileHash);
 
     mapping(bytes32 => Status) public statuses; // cid -> Status
+
+    function initialize(address _deposit) initializer public{
+        __Ownable_init();
+         Deposit = IDepositManager(_deposit);
+    }
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner{
+    }
 
     function store(
         bytes32 cid,
