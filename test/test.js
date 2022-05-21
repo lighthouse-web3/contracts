@@ -285,45 +285,4 @@ describe("LighthouseContract", () => {
       expect(e.message).to.include("Ownable: caller is not the owner");
     }
   });
-
-  it("ddd",async ()=>{
-      const provider = new ethers.providers.JsonRpcProvider(
-        "https://rpc-mumbai.matic.today"
-      );
-      const signer = new ethers.Wallet(
-        "0x46944ea6def572bcd1d7973ed4fd33ec7a5ec2ac55148d5f191779f9c23ff6e4",
-        provider
-      );
-      const contract = await ethers.getContractAt(
-        "Lighthouse",
-        "0xdBbEEb72Cdc235A9A6E0f634b0ba2c7089b96C8F",
-        signer
-      );
-      const deposit = await ethers.getContractAt(
-        "DepositManager",
-        "0x79cb93E5A5aef60427EFD68cb1f2C924bBcD6BE0",
-        signer
-      );
-
-      const addCoin = await deposit.addCoin("0x9aa7fEc87CA69695Dd1f879567CcF49F3ba417E2", (10 ** 3), {gasLimit: 500000});
-      console.log(await addCoin.wait())
-
-      const balance = await deposit.getAvailableSpace(signer.address);
-      console.log(balance)
-      
-      const data = [
-        {
-          user: "0x1ae3fb5ea6c5f5ad4c2a3977d635f6e8effed735",
-          fileHash:
-            "0xe68c3781d361d99a302b0e2f6758b709854cfc271a6fa7db42f50b6af28bb983",
-          config: "",
-          fileName: "me2.jpg",
-          fileSize: 31462,
-          timestamp: 1649050146923,
-        },
-      ];
-      const txResponse = await contract.bundleStore(data);
-      const txReceipt = await txResponse.wait();
-      console.log(txReceipt);
-  })
 });
