@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
 async function main() {
   const [deployer] = await ethers.getSigners();
@@ -9,16 +9,20 @@ async function main() {
   console.log(`Acccount Balance: ${balance.toString()}`);
 
   const Deposit = await ethers.getContractFactory(
-    "DepositManager"
+    "contracts/DepositManager.sol:DepositManager"
   );
-  const deposit = await Deposit.deploy();
+  const deposit = await upgrades.deployProxy(Deposit, { kind: "uups" });
 
-  const Lighthouse = await ethers.getContractFactory(
-    "Lighthouse"
-  );
-  const lighthouse = await Lighthouse.deploy(deposit.address);
-  console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);
   console.log(`Deposit Contract deployed at : ${deposit.address}`);
+  const Lighthouse = await ethers.getContractFactory(
+    "contracts/Lighthouse.sol:Lighthouse"
+  );
+
+  const lighthouse = await upgrades.deployProxy(Lighthouse, [deposit.address], {
+    kind: "uups",
+  });
+
+  console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);
 }
 
 main()

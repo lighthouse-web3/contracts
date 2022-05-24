@@ -49,7 +49,7 @@ contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
     }
 
     struct Storage {
-        bytes32[] fileHashs;
+        string[] fileHashs;
         uint256 totalStored;
         uint256 availableStorage;
     }
@@ -172,7 +172,7 @@ contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
     function updateStorage(
         address user,
         uint256 filesize,
-        bytes32 fileHash
+        string calldata fileHash
     ) public ManagerorOwner {
         storageList[user].fileHashs.push(fileHash);
         storageList[user].totalStored = storageList[user].totalStored.add(

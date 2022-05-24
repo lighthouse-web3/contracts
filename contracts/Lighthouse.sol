@@ -15,7 +15,7 @@ contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
 
     struct Content {
         address user;
-        bytes32 fileHash;
+        string cid;
         string config;
         string fileName;
         uint256 fileSize;
@@ -29,7 +29,7 @@ contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
 
     event StorageRequest(
         address indexed uploader,
-        bytes32 fileHash,
+        string cid,
         string config,
         uint256 fileCost,
         string fileName,
@@ -50,9 +50,9 @@ contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
         Content[] contents,
         uint256 timestamp
     );
-    event StorageStatusRequest(address requester, bytes32 fileHash);
+    event StorageStatusRequest(address requester, string cid);
 
-    mapping(bytes32 => Status) public statuses; // cid -> Status
+    mapping(string => Status) public statuses; // cid -> Status
 
     function initialize(address _deposit) initializer public{
         __Ownable_init();
@@ -62,7 +62,7 @@ contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
     }
 
     function store(
-        bytes32 cid,
+        string calldata cid,
         string calldata config,
         string calldata fileName,
         uint256 fileSize
@@ -94,7 +94,7 @@ contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
                 Deposit.updateStorage(
                     contents[i].user,
                     contents[i].fileSize,
-                    contents[i].fileHash
+                    contents[i].cid
                 );
             } else {
                 failedUpload[failedCount] = contents[i];
@@ -120,12 +120,12 @@ contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
         }
     }
 
-    function requestStorageStatus(bytes32 cid) external {
+    function requestStorageStatus(string calldata cid) external {
         emit StorageStatusRequest(msg.sender, cid);
     }
 
     function publishStorageStatus(
-        bytes32 cid,
+        string calldata cid,
         string calldata dealIds,
         bool active
     ) external onlyOwner {

@@ -2,7 +2,7 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require("dotenv").config();
-require("solidity-coverage")
+require("solidity-coverage");
 require("@nomiclabs/hardhat-waffle");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-web3");
@@ -33,7 +33,7 @@ task("balance", "Prints an account's balance")
 
     console.log(web3.utils.fromWei(balance, "ether"), "ETH");
   });
- 
+
 module.exports = {
   // defaultNetwork: "hardhat",
   networks: {
@@ -70,6 +70,15 @@ module.exports = {
     fantomTest: {
       url: "https://rpc.ankr.com/fantom_testnet/",
       accounts: [PRIVATE_KEY],
+      chainId: 4002,
+      // accounts: {
+      //     mnemonic: MNEMONIC,
+      // }
+    },
+    fuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      accounts: [PRIVATE_KEY],
+      chainId: 43113,
       // accounts: {
       //     mnemonic: MNEMONIC,
       // }
@@ -91,7 +100,7 @@ module.exports = {
       saveDeployments: true,
     },
     matictestnet: {
-      url: "https://rpc-mumbai.maticvigil.com/",
+      url: "https://rpc-mumbai.maticvigil.com/v1/77477ef24f608960cddd51d6cddd6e92e2ded602",
       accounts: [PRIVATE_KEY],
       saveDeployments: true,
     },
