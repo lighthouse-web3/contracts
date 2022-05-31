@@ -16,7 +16,7 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
         bool isActive; // can account still get this plan
         bytes7 code; // external unique ref or identify for example a 7 char string like FAM2021 or a byte ending of anything
     }
-    struct UserSubcription {
+    struct UserSubscription {
         uint32 occuranceLeft;
         uint96 lastDebit;
         uint64 systemDefinedSubscriptionID;
@@ -33,7 +33,7 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
     uint32 constant RATE_DENOMINATOR = 100_000;
     SystemDefinedSubscription[] public contractSubscriptions;
     mapping(address => StableCoinState) private stableCoinStatus;
-    mapping(address => UserSubcription) private userToSubscription;
+    mapping(address => UserSubscription) private userToSubscription;
 
     function initialize() public initializer {
         __Ownable_init();
@@ -66,26 +66,50 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
         return true;
     }
 
-    function increaseBlockNumber(uint256 subcriptionId, uint32 increase)
+    function increaseBlockNumber(uint256 subscriptionId, uint32 increase)
         external
         onlyOwner
     {
-        assert(contractSubscriptions[subcriptionId].deductionIN > 0);
-        contractSubscriptions[subcriptionId].deductionIN =
-            contractSubscriptions[subcriptionId].deductionIN +
+        assert(contractSubscriptions[subscriptionId].deductionIN > 0);
+        contractSubscriptions[subscriptionId].deductionIN =
+            contractSubscriptions[subscriptionId].deductionIN +
             increase;
     }
 
     //===============Admin Calls END=======================
 
-    function purchaseSubcription(address account) internal returns (bool) {
-        UserSubcription storage subscription = userToSubscription[account];
+    function _getAmountToBeDeducted(address tokenAddress, uint64 subscriptionID)
+        internal view
+        returns (uint256)
+    {
+        return
+            uint256(
+                contractSubscriptions[subscriptionID].amount *
+                    stableCoinStatus[tokenAddress].rate *
+                    IERC20MetadataUpgradeable(tokenAddress).decimals()
+            ).div(RATE_DENOMINATOR**2);
+    }
+
+    //============== User Calls Begin =================================
+    function purchaseSubscription(address account) internal returns (bool) {
+        UserSubscription storage subscription = userToSubscription[account];
         assert(subscription.lastDebit > 0);
         require(
             block.number - subscription.lastDebit >
                 contractSubscriptions[subscription.systemDefinedSubscriptionID]
                     .frequencyOfDeduction
         );
+        if (
+            IERC20MetadataUpgradeable(subscription.tokenAddress).balanceOf(
+                _msgSender()
+            ) <
+            _getAmountToBeDeducted(
+                subscription.tokenAddress,
+                subscription.systemDefinedSubscriptionID
+            )
+        ) {
+            return false;
+        }
         IERC20Upgradeable(subscription.tokenAddress).transferFrom(
             account,
             address(this),
@@ -96,8 +120,8 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
         return true;
     }
 
-    function activateSubcription(
-        uint24 systemDefinedSubscriptionId,
+    function activateSubscription(
+        uint64 systemDefinedSubscriptionId,
         address tokenAddress
     ) external returns (bool) {
         assert(stableCoinStatus[tokenAddress].isActive == true);
@@ -105,25 +129,18 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
             systemDefinedSubscriptionId
         ];
         assert(userToSubscription[_msgSender()].occuranceLeft == 0);
-        uint256 amountTOBeDeducted = uint256(
-            subscription.amount *
-                subscription.frequencyOfDeduction *
-                stableCoinStatus[tokenAddress].rate *
-                IERC20MetadataUpgradeable(tokenAddress).decimals()
-        ).div(RATE_DENOMINATOR**2);
+        uint256 amountTOBeDeducted = _getAmountToBeDeducted(
+            tokenAddress,
+            systemDefinedSubscriptionId
+        );
         require(
             IERC20MetadataUpgradeable(tokenAddress).allowance(
                 _msgSender(),
                 address(this)
-            ) >= amountTOBeDeducted,
-            "Increase Allowance to match subcription"
+            ) >= subscription.frequencyOfDeduction * amountTOBeDeducted,
+            "Increase Allowance to match subscription"
         );
-        require(
-            IERC20MetadataUpgradeable(tokenAddress).balanceOf(_msgSender()) >=
-                subscription.amount,
-            "Insuffient balance"
-        );
-        userToSubscription[_msgSender()] = UserSubcription(
+        userToSubscription[_msgSender()] = UserSubscription(
             subscription.frequencyOfDeduction,
             0,
             systemDefinedSubscriptionId,
@@ -131,13 +148,16 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
             tokenAddress,
             uint96(block.number)
         );
-        return purchaseSubcription(_msgSender());
+        return purchaseSubscription(_msgSender());
     }
 
-    function isSubcriptionActive(address account)
+    function isSubscriptionActive(address account)
         external
         returns (bool, uint96)
     {
+        if (userToSubscription[_msgSender()].lastDebit == 0) {
+            return (false, type(uint96).max);
+        }
         if (
             block.number - userToSubscription[account].lastDebit <
             contractSubscriptions[
@@ -150,9 +170,17 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
             );
         } else {
             return (
-                purchaseSubcription(account),
+                purchaseSubscription(account),
                 userToSubscription[account].systemDefinedSubscriptionID
             );
         }
     }
+
+    function cancelSubscription() external {
+        assert(userToSubscription[_msgSender()].occuranceLeft != 0);
+        userToSubscription[_msgSender()].occuranceLeft = 0;
+        userToSubscription[_msgSender()].isCancelled = true;
+    }
+
+    //============== User Calls ENDS =================================
 }
