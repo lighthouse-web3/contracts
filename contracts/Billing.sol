@@ -134,16 +134,25 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
         return purchaseSubcription(_msgSender());
     }
 
-    function isSubcriptionActive(address account) external returns (bool) {
+    function isSubcriptionActive(address account)
+        external
+        returns (bool, uint96)
+    {
         if (
             block.number - userToSubscription[account].lastDebit <
             contractSubscriptions[
                 userToSubscription[account].systemDefinedSubscriptionID
             ].frequencyOfDeduction
         ) {
-            return true;
+            return (
+                true,
+                userToSubscription[account].systemDefinedSubscriptionID
+            );
         } else {
-            return purchaseSubcription(account);
+            return (
+                purchaseSubcription(account),
+                userToSubscription[account].systemDefinedSubscriptionID
+            );
         }
     }
 }
