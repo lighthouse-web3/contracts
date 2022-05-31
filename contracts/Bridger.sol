@@ -61,8 +61,8 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     //get the expected gas fee\
-    function getSwapFee(uint16 _dstChainId, address _to)
-        external
+    function getSwapFee(uint16 _dstChainId)
+        public
         view
         returns (uint256)
     {
@@ -74,24 +74,6 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
                 TYPE_SWAP_REMOTE,
                 _toAddress,
                 abi.encodePacked(),
-                IStargateRouter.lzTxObj(0, 0, "0x")
-            );
-
-        return nativeFee;
-    }
-
-    //get the expected gas fee\
-    function _getSwapFee(
-        uint16 _dstChainId,
-        bytes memory _toAddress,
-        bytes memory _data
-    ) internal view returns (uint256) {
-        (uint256 nativeFee, ) = IStargateRouter(stargateRouter)
-            .quoteLayerZeroFee(
-                _dstChainId,
-                TYPE_SWAP_REMOTE,
-                _toAddress,
-                _data,
                 IStargateRouter.lzTxObj(0, 0, "0x")
             );
 
@@ -126,7 +108,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
         bytes memory data = abi.encodePacked();
 
         require(
-            msg.value >= _getSwapFee(chainId, _toAddress, data),
+            msg.value >= getSwapFee(chainId),
             "Not enough funds for gas"
         );
 
