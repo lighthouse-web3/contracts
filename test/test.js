@@ -1,6 +1,5 @@
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
-const crypto = require("crypto");
 
 let Lighthouse,
   lighthouse,
@@ -13,9 +12,6 @@ let Lighthouse,
   account3,
   account4;
 
-function generateRandomAddressSigner() {
-  return new ethers.Wallet.createRandom();
-}
 beforeEach(async () => {
   [owner, account2, account3, account4] = await ethers.getSigners();
   owner = owner.address;
@@ -28,11 +24,9 @@ beforeEach(async () => {
   Lighthouse = await ethers.getContractFactory(
     "contracts/Lighthouse.sol:Lighthouse"
   );
-  lighthouse = await upgrades.deployProxy(
-    Lighthouse,
-    [deposit.address],
-    { kind: "uups", }
-  );
+  lighthouse = await upgrades.deployProxy(Lighthouse, [deposit.address], {
+    kind: "uups",
+  });
 
   StableCoin = await ethers.getContractFactory("Dai");
   stableCoin = await StableCoin.deploy();
@@ -157,7 +151,6 @@ describe("LighthouseContract", () => {
       await lighthouse.bundleStore(chunkarr);
     }
   });
-
 
   it("test edgeCase", async () => {
     await deposit.updateAvailableStorage(
@@ -300,5 +293,29 @@ describe("LighthouseContract", () => {
     data = await stableCoin.balanceOf(deposit.address);
 
     expect(data).to.equal(0);
+  });
+
+  it("Should emit StorageStatusRequest event", async () => {
+    await expect(
+      lighthouse.requestStorageStatus(
+        "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR"
+      )
+    ).to.emit(lighthouse, "StorageStatusRequest");
+  });
+
+  it("Should publish/set Storage Status", async () => {
+    const dealId = "1243324";
+    let tx = await lighthouse.publishStorageStatus(
+      "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR",
+      dealId,
+      true
+    );
+    tx = await tx.wait();
+
+    data = await lighthouse.statuses(
+      "QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR"
+    );
+    expect(data.active).to.equal(true);
+    expect(data.dealIds).to.equal(dealId);
   });
 });

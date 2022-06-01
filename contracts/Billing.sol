@@ -6,24 +6,10 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
+import "./IBilling.sol";
 
-contract Billing is OwnableUpgradeable, UUPSUpgradeable {
+contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
     using SafeMathUpgradeable for uint256;
-    struct SystemDefinedSubscription {
-        uint32 frequencyOfDeduction; // the frequency of deduction
-        uint32 deductionIN; // how long until the next deduction in Block Number
-        uint128 amount; // the amount to the deducted in dollars * 1e6(RATE_DENOMINATOR)
-        bool isActive; // can account still get this plan
-        bytes7 code; // external unique ref or identify for example a 7 char string like FAM2021 or a byte ending of anything
-    }
-    struct UserSubscription {
-        uint32 occuranceLeft;
-        uint96 lastDebit;
-        uint64 systemDefinedSubscriptionID;
-        bool isCancelled;
-        address tokenAddress;
-        uint96 createdAt;
-    }
 
     struct StableCoinState {
         uint64 rate;
@@ -45,10 +31,14 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
         internal
         override
         onlyOwner
-    {}
+    {
+        emit UpdateContract(_msgSender(), newImplementation);
+    }
 
-    function createSubscription(SystemDefinedSubscription calldata _sub)
+    function createSystemSubscription(SystemDefinedSubscription calldata _sub)
         external
+        virtual
+        override
         onlyOwner
         returns (uint64)
     {
@@ -56,17 +46,32 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
         return uint64(contractSubscriptions.length);
     }
 
+    function cancelSystemSubscription(uint256 subID)
+        external
+        virtual
+        override
+        onlyOwner
+    {
+        require(contractSubscriptions[subID].isActive!=false);
+        contractSubscriptions[subID].isActive = false;
+    }
+
     function addStableCoin(
         address tokenAddress,
         StableCoinState calldata _stableCoin
-    ) external onlyOwner returns (bool) {
-        require(tokenAddress != address(0));
+    ) external onlyOwner {
+        assert(tokenAddress != address(0));
         assert(stableCoinStatus[tokenAddress].rate == 0);
         stableCoinStatus[tokenAddress] = _stableCoin;
-        return true;
+        emit StableCoinStatus(
+            _msgSender(),
+            tokenAddress,
+            _stableCoin.rate,
+            _stableCoin.isActive
+        );
     }
 
-    function increaseBlockNumber(uint256 subscriptionId, uint32 increase)
+    function increaseBlockNumber(uint96 subscriptionId, uint32 increase)
         external
         onlyOwner
     {
@@ -74,12 +79,25 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
         contractSubscriptions[subscriptionId].deductionIN =
             contractSubscriptions[subscriptionId].deductionIN +
             increase;
+        emit IncreaseBlockNumber(_msgSender(), subscriptionId, increase);
     }
+
+    /// @notice Sweep function in case any tokens get stuck in the contract
+    /// @param _asset Address of the token to sweep
+    function sweep(address _asset) external onlyOwner {
+        IERC20MetadataUpgradeable(_asset).transfer(
+            msg.sender,
+            IERC20Upgradeable(_asset).balanceOf(address(this))
+        );
+    }
+
+    receive() external payable {}
 
     //===============Admin Calls END=======================
 
     function _getAmountToBeDeducted(address tokenAddress, uint64 subscriptionID)
-        internal view
+        internal
+        view
         returns (uint256)
     {
         return
@@ -117,6 +135,11 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
                 .amount
         );
         subscription.lastDebit = subscription.lastDebit - 1;
+        emit Purchase(
+            account,
+            subscription.systemDefinedSubscriptionID,
+            subscription.tokenAddress
+        );
         return true;
     }
 
@@ -128,6 +151,7 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
         SystemDefinedSubscription storage subscription = contractSubscriptions[
             systemDefinedSubscriptionId
         ];
+        assert(subscription.isActive == true);
         assert(userToSubscription[_msgSender()].occuranceLeft == 0);
         uint256 amountTOBeDeducted = _getAmountToBeDeducted(
             tokenAddress,
@@ -153,10 +177,10 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
 
     function isSubscriptionActive(address account)
         external
-        returns (bool, uint96)
+        returns (bool, uint64)
     {
         if (userToSubscription[_msgSender()].lastDebit == 0) {
-            return (false, type(uint96).max);
+            return (false, type(uint64).max);
         }
         if (
             block.number - userToSubscription[account].lastDebit <
@@ -177,9 +201,16 @@ contract Billing is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function cancelSubscription() external {
-        assert(userToSubscription[_msgSender()].occuranceLeft != 0);
+        require(
+            userToSubscription[_msgSender()].occuranceLeft != 0,
+            "No active subscription"
+        );
         userToSubscription[_msgSender()].occuranceLeft = 0;
         userToSubscription[_msgSender()].isCancelled = true;
+        emit CancelSubscription(
+            _msgSender(),
+            userToSubscription[_msgSender()].systemDefinedSubscriptionID
+        );
     }
 
     //============== User Calls ENDS =================================

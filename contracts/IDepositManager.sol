@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 /**
- * @dev Interface of the light's house
+ * @dev Interface of the lighthouse.sol
  */
 interface IDepositManager {
     /**

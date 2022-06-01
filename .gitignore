@@ -19,3 +19,4 @@ gas-report.txt
 scripts/setupPurchaseStorage.js
 scripts/setupStableCoin.js
 .openzeppelin
+coverage.json
