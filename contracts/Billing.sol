@@ -11,14 +11,9 @@ import "./IBilling.sol";
 contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
     using SafeMathUpgradeable for uint256;
 
-    struct StableCoinState {
-        uint64 rate;
-        bool isActive;
-    }
-
-    uint32 constant RATE_DENOMINATOR = 100_000;
+    uint256 constant RATE_DENOMINATOR = 1e6;
     SystemDefinedSubscription[] public contractSubscriptions;
-    mapping(address => StableCoinState) private stableCoinStatus;
+    mapping(address => StableCoinState) public stableCoinStatus;
     mapping(address => UserSubscription) private userToSubscription;
 
     function initialize() public initializer {
@@ -46,13 +41,13 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         return uint64(contractSubscriptions.length);
     }
 
-    function cancelSystemSubscription(uint256 subID)
+    function cancelSystemSubscription(uint64 subID)
         external
         virtual
         override
         onlyOwner
     {
-        require(contractSubscriptions[subID].isActive!=false);
+        require(contractSubscriptions[subID].isActive != false);
         contractSubscriptions[subID].isActive = false;
     }
 
@@ -95,23 +90,27 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
 
     //===============Admin Calls END=======================
 
-    function _getAmountToBeDeducted(address tokenAddress, uint64 subscriptionID)
-        internal
+    function getAmountToBeDeducted(address tokenAddress, uint64 subscriptionID)
+        public
         view
         returns (uint256)
     {
+        require(
+            stableCoinStatus[tokenAddress].rate > 0,
+            "TokenAddress Not Acceptable HERE"
+        );
         return
             uint256(
                 contractSubscriptions[subscriptionID].amount *
                     stableCoinStatus[tokenAddress].rate *
-                    IERC20MetadataUpgradeable(tokenAddress).decimals()
-            ).div(RATE_DENOMINATOR**2);
+                    10**(IERC20MetadataUpgradeable(tokenAddress).decimals())
+            ).div(RATE_DENOMINATOR * RATE_DENOMINATOR);
     }
 
     //============== User Calls Begin =================================
     function purchaseSubscription(address account) internal returns (bool) {
         UserSubscription storage subscription = userToSubscription[account];
-        assert(subscription.lastDebit > 0);
+        assert(subscription.occuranceLeft > 0);
         require(
             block.number - subscription.lastDebit >
                 contractSubscriptions[subscription.systemDefinedSubscriptionID]
@@ -121,7 +120,7 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
             IERC20MetadataUpgradeable(subscription.tokenAddress).balanceOf(
                 _msgSender()
             ) <
-            _getAmountToBeDeducted(
+            getAmountToBeDeducted(
                 subscription.tokenAddress,
                 subscription.systemDefinedSubscriptionID
             )
@@ -134,7 +133,8 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
             contractSubscriptions[subscription.systemDefinedSubscriptionID]
                 .amount
         );
-        subscription.lastDebit = subscription.lastDebit - 1;
+        subscription.occuranceLeft = subscription.occuranceLeft - 1;
+        subscription.lastDebit = uint96(block.number);
         emit Purchase(
             account,
             subscription.systemDefinedSubscriptionID,
@@ -151,9 +151,9 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         SystemDefinedSubscription storage subscription = contractSubscriptions[
             systemDefinedSubscriptionId
         ];
-        assert(subscription.isActive == true);
+        require(subscription.isActive == true, "this offer has expired");
         assert(userToSubscription[_msgSender()].occuranceLeft == 0);
-        uint256 amountTOBeDeducted = _getAmountToBeDeducted(
+        uint256 amountTOBeDeducted = getAmountToBeDeducted(
             tokenAddress,
             systemDefinedSubscriptionId
         );
@@ -175,8 +175,8 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         return purchaseSubscription(_msgSender());
     }
 
-    function isSubscriptionActive(address account)
-        external
+    function _isSubscriptionActive(address account)
+        public
         returns (bool, uint64)
     {
         if (userToSubscription[_msgSender()].lastDebit == 0) {
@@ -198,6 +198,15 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
                 userToSubscription[account].systemDefinedSubscriptionID
             );
         }
+    }
+
+    function isSubscriptionActive(address account) external {
+        (bool status, uint64 id) = _isSubscriptionActive(account);
+        emit SubscriptionStatus(
+            account,
+            status,
+            id
+        );
     }
 
     function cancelSubscription() external {

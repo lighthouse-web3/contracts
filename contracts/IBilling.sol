@@ -21,6 +21,11 @@ interface IBilling {
         uint96 createdAt;
     }
 
+    struct StableCoinState {
+        uint64 rate;
+        bool isActive;
+    }
+
     /**
      * @dev Emitted when a purchase is made
      *
@@ -62,6 +67,18 @@ interface IBilling {
      *
      * Note  account must a subscription
      */
+    event SubscriptionStatus(
+        address indexed account,
+        bool active,
+        uint64 indexed subscriptionID
+    );
+
+    /**
+     * @dev Emitted when a Subcription is cancelled
+     *
+     *
+     * Note  account must a subscription
+     */
     event CancelSubscription(
         address indexed account,
         uint256 indexed subscriptionID
@@ -79,11 +96,11 @@ interface IBilling {
         uint64 rate,
         bool indexed isActive
     );
+    
 
     function createSystemSubscription(SystemDefinedSubscription calldata _sub)
         external
         returns (uint64);
 
-    function cancelSystemSubscription(uint id)
-        external;
+    function cancelSystemSubscription(uint64 id) external;
 }
