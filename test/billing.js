@@ -77,7 +77,6 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     try {
       data = await billing.getAmountToBeDeducted(stableCoin.address, 0);
-      console.log(data);
     } catch (e) {
       expect(e.message).to.include(
         "VM Exception while processing transaction:"
@@ -190,4 +189,218 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     expect(tx.events[0].args.active).to.equal(false);
   });
+
+  it("account that has no subscription cant cancel an order", async () => {
+    try {
+      tx = await billing.cancelSubscription();
+    } catch (e) {
+      expect(e.message).to.include(
+        "VM Exception while processing transaction: reverted with reason string 'No active subscription'"
+      );
+    }
+  });
+
+  it("should be able to Opt-out of a plan", async () => {
+    const subData = {
+      frequencyOfDeduction: 3,
+      deductionIN: 20,
+      amount: 3.5 * 1e6,
+      isActive: true,
+      code: "0x00000000000000",
+    };
+    let tx = await billing.createSystemSubscription(subData);
+    tx = await tx.wait();
+    tx = await billing.addStableCoin(stableCoin.address, {
+      rate: 0.997 * 1e6,
+      isActive: true,
+    });
+    tx = await tx.wait();
+    price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
+
+    stableCoin.approve(
+      billing.address,
+      `${price * subData.frequencyOfDeduction}`
+    );
+    tx = await billing.activateSubscription(0, stableCoin.address);
+    tx = await billing.isSubscriptionActive(owner);
+    tx = await tx.wait();
+    expect(tx.events[0].args.active).to.equal(true);
+
+    tx = await billing.cancelSubscription();
+    tx = await tx.wait();
+
+    tx = await billing.isSubscriptionActive(owner);
+    tx = await tx.wait();
+    //validate the user can still use the package  they paid for
+    expect(tx.events[0].args.active).to.equal(true);
+  });
+
+  it("should not be charged after Opting-out of a plan", async () => {
+    const subData = {
+      frequencyOfDeduction: 2,
+      deductionIN: 2,
+      amount: 3.5 * 1e6,
+      isActive: true,
+      code: "0x00000000000000",
+    };
+    let tx = await billing.createSystemSubscription(subData);
+    tx = await tx.wait();
+    tx = await billing.addStableCoin(stableCoin.address, {
+      rate: 0.997 * 1e6,
+      isActive: true,
+    });
+    tx = await tx.wait();
+    price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
+
+    tx = await stableCoin.approve(
+      billing.address,
+      `${price * subData.frequencyOfDeduction}`
+    );
+    tx = await tx.wait();
+    tx = await billing.activateSubscription(0, stableCoin.address);
+    tx = await billing.isSubscriptionActive(owner);
+    tx = await tx.wait();
+    expect(tx.events[0].args.active).to.equal(true);
+
+    tx = await billing.cancelSubscription();
+    tx = await tx.wait();
+
+    try {
+      tx = await billing.isSubscriptionActive(owner);
+    } catch (e) {
+      expect(e.message).to.include(
+        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'"
+      );
+    }
+  });
+
+  it("should not be charged after Opting-out of a plan", async () => {
+    const subData = {
+      frequencyOfDeduction: 2,
+      deductionIN: 2,
+      amount: 3.5 * 1e6,
+      isActive: true,
+      code: "0x00000000000000",
+    };
+    let tx = await billing.createSystemSubscription(subData);
+    tx = await tx.wait();
+    tx = await billing.addStableCoin(stableCoin.address, {
+      rate: 0.997 * 1e6,
+      isActive: true,
+    });
+    tx = await tx.wait();
+    price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
+
+    tx = await stableCoin.approve(
+      billing.address,
+      `${price * subData.frequencyOfDeduction}`
+    );
+    tx = await tx.wait();
+    tx = await billing.activateSubscription(0, stableCoin.address);
+    tx = await billing.isSubscriptionActive(owner);
+    tx = await tx.wait();
+    expect(tx.events[0].args.active).to.equal(true);
+
+    tx = await billing.cancelSubscription();
+    tx = await tx.wait();
+
+    try {
+      tx = await billing.isSubscriptionActive(owner);
+    } catch (e) {
+      expect(e.message).to.include(
+        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'"
+      );
+    }
+  });
+
+  it("should claim token ", async () => {
+    const subData = {
+      frequencyOfDeduction: 2,
+      deductionIN: 1,
+      amount: 3.5 * 1e6,
+      isActive: true,
+      code: "0x00000000000000",
+    };
+    let tx = await billing.createSystemSubscription(subData);
+    tx = await tx.wait();
+    tx = await billing.increaseBlockNumber(0, 200);
+    tx = await tx.wait();
+    tx = await billing.addStableCoin(stableCoin.address, {
+      rate: 0.997 * 1e6,
+      isActive: true,
+    });
+    tx = await tx.wait();
+    price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
+
+    tx = await stableCoin.approve(
+      billing.address,
+      `${price * subData.frequencyOfDeduction}`
+    );
+    tx = await tx.wait();
+    tx = await billing.activateSubscription(0, stableCoin.address);
+    tx = await billing.isSubscriptionActive(owner);
+    tx = await tx.wait();
+    expect(tx.events[0].args.active).to.equal(true);
+
+    tx = await billing.cancelSubscription();
+    tx = await tx.wait();
+
+    try {
+      tx = await billing.isSubscriptionActive(owner);
+    } catch (e) {
+      expect(e.message).to.include(
+        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'"
+      );
+    }
+
+    expect(await stableCoin.balanceOf(account4.address)).to.equal(0);
+
+    let contractBalance = await stableCoin.balanceOf(billing.address);
+    tx = await billing.claim(
+      stableCoin.address,
+      account4.address,
+      contractBalance.toString()
+    );
+    tx = await tx.wait();
+
+    tx = await stableCoin
+      .connect(account4)
+      .transferFrom(billing.address, account4.address, contractBalance);
+    expect(await stableCoin.balanceOf(account4.address)).to.equal(
+      contractBalance
+    );
+  });
+
+
+  it("Should active Subscription ", async () => {
+    const subData = {
+      frequencyOfDeduction: 2,
+      deductionIN: 2,
+      amount: 3.5 * 1e6,
+      isActive: true,
+      code: "0x00000000000000",
+    };
+    let tx = await billing.createSystemSubscription(subData);
+    tx = await tx.wait();
+    tx = await billing.addStableCoin(stableCoin.address, {
+      rate: 0.997 * 1e6,
+      isActive: true,
+    });
+    tx = await tx.wait();
+    price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
+
+    tx = await stableCoin.connect(account4).approve(
+      billing.address,
+      `${price * subData.frequencyOfDeduction}`
+    );
+    tx = await billing.connect(account4).activateSubscription(0, stableCoin.address);
+    tx = await billing.isSubscriptionActive(owner);
+    tx = await tx.wait();
+    expect(tx.events[0].args.active).to.equal(false);
+  });
+
+  it("test upgrade",async()=>{
+    const Billing = await ethers.getContractFactory("Billing");
+    let tx = await upgrades.upgradeProxy(billing.address,Billing, { kind: "uups" });
+  })
 });

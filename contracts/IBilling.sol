@@ -74,6 +74,18 @@ interface IBilling {
     );
 
     /**
+     * @dev Emitted when a withdraw approval is given
+     *
+     *
+     * Note  account must a subscription
+     */
+    event withdrawApproval(
+        address indexed account,
+        address indexed tokenAddress,
+        uint256 indexed amount
+    );
+
+    /**
      * @dev Emitted when a Subcription is cancelled
      *
      *
@@ -96,7 +108,6 @@ interface IBilling {
         uint64 rate,
         bool indexed isActive
     );
-    
 
     function createSystemSubscription(SystemDefinedSubscription calldata _sub)
         external

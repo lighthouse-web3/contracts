@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "./IBilling.sol";
 
+
 contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
     using SafeMathUpgradeable for uint256;
 
@@ -77,13 +78,16 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         emit IncreaseBlockNumber(_msgSender(), subscriptionId, increase);
     }
 
-    /// @notice Sweep function in case any tokens get stuck in the contract
-    /// @param _asset Address of the token to sweep
-    function sweep(address _asset) external onlyOwner {
-        IERC20MetadataUpgradeable(_asset).transfer(
-            msg.sender,
-            IERC20Upgradeable(_asset).balanceOf(address(this))
-        );
+    /// @param _asset Address of the token to claim
+    /// @param _amount Amount to claim
+    function claim(
+        address _asset,
+        address _to,
+        uint256 _amount
+    ) external onlyOwner {
+        assert(IERC20Upgradeable(_asset).balanceOf(address(this)) >= _amount);
+        IERC20MetadataUpgradeable(_asset).approve(_to, _amount);
+        emit withdrawApproval(_to, _asset, _amount);
     }
 
     receive() external payable {}
@@ -110,7 +114,10 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
     //============== User Calls Begin =================================
     function purchaseSubscription(address account) internal returns (bool) {
         UserSubscription storage subscription = userToSubscription[account];
-        assert(subscription.occuranceLeft > 0);
+        require(
+            subscription.occuranceLeft > 0,
+            "subscription expired or doesn't exist"
+        );
         require(
             block.number - subscription.lastDebit >
                 contractSubscriptions[subscription.systemDefinedSubscriptionID]
@@ -130,8 +137,10 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         IERC20Upgradeable(subscription.tokenAddress).transferFrom(
             account,
             address(this),
-            contractSubscriptions[subscription.systemDefinedSubscriptionID]
-                .amount
+            getAmountToBeDeducted(
+                subscription.tokenAddress,
+                subscription.systemDefinedSubscriptionID
+            )
         );
         subscription.occuranceLeft = subscription.occuranceLeft - 1;
         subscription.lastDebit = uint96(block.number);
@@ -183,10 +192,10 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
             return (false, type(uint64).max);
         }
         if (
-            block.number - userToSubscription[account].lastDebit <
+            block.number - userToSubscription[account].lastDebit <=
             contractSubscriptions[
                 userToSubscription[account].systemDefinedSubscriptionID
-            ].frequencyOfDeduction
+            ].deductionIN
         ) {
             return (
                 true,
@@ -202,11 +211,7 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
 
     function isSubscriptionActive(address account) external {
         (bool status, uint64 id) = _isSubscriptionActive(account);
-        emit SubscriptionStatus(
-            account,
-            status,
-            id
-        );
+        emit SubscriptionStatus(account, status, id);
     }
 
     function cancelSubscription() external {
@@ -216,6 +221,8 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         );
         userToSubscription[_msgSender()].occuranceLeft = 0;
         userToSubscription[_msgSender()].isCancelled = true;
+        IERC20Upgradeable(userToSubscription[_msgSender()].tokenAddress)
+            .approve(address(this), 0);
         emit CancelSubscription(
             _msgSender(),
             userToSubscription[_msgSender()].systemDefinedSubscriptionID
