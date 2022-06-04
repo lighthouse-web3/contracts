@@ -11,7 +11,7 @@ const MAINNET_RPC_URL =
   process.env.MAINNET_RPC_URL || process.env.ALCHEMY_MAINNET_RPC_URL || "";
 const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL || "";
 const KOVAN_RPC_URL = process.env.KOVAN_RPC_URL || "";
-const POLYGON_KEY = process.env.POLYGON_KEY || "";
+const POLYGON_RPC_URL = process.env.POLYGON_RPC_URL || "";
 const MNEMONIC = process.env.MNEMONIC || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 
@@ -101,7 +101,7 @@ module.exports = {
       saveDeployments: true,
     },
     matictestnet: {
-      url: `https://rpc-mumbai.maticvigil.com/v1/${POLYGON_KEY}`,
+      url: POLYGON_RPC_URL,
       accounts: [PRIVATE_KEY],
       saveDeployments: true,
     },

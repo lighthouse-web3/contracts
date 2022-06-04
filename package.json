@@ -7,8 +7,9 @@
     "node": "^16.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "solhint": "solhint -f table contracts/**/*.sol"
+    "compile": "hardhat compile",
+    "test": "hardhat test test/*test.js --network hardhat",
+    "coverage": "hardhat coverage --solcoverjs ./.solcover.js"
   },
   "repository": {
     "type": "git",
