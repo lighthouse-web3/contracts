@@ -6,8 +6,10 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
+contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
+    AggregatorV3Interface internal priceFeed;
     using SafeMath for uint256;
 
     /**
@@ -32,15 +34,12 @@ contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
         address indexed whitelistAddress,
         bool indexed status
     );
-    uint256 private _costOfStorage ;
+    uint256 private _costOfStorage;
 
     mapping(address => Deposit[]) public deposits;
     mapping(address => Storage) public storageList;
     mapping(address => bool) private whiteListedAddr;
     mapping(address => uint256) private stableCoinRate;
-
-
-
 
     struct Deposit {
         uint256 timestamp;
@@ -53,14 +52,17 @@ contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
         uint256 totalStored;
         uint256 availableStorage;
     }
-    function initialize() initializer public{
+
+    function initialize() public initializer {
         __Ownable_init();
         _costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner{
-    }
-
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
 
     function addDeposit(address _coinAddress, uint256 _amount) external {
         address wallet = msg.sender;
@@ -89,8 +91,18 @@ contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
         );
     }
 
+    function changePriceFeed(address aggregatorAddressFeed) public onlyOwner {
+        priceFeed = AggregatorV3Interface(aggregatorAddressFeed);
+    }
+
     function changeCostOfStorage(uint256 newCost) public onlyOwner {
         _costOfStorage = newCost;
+    }
+
+    function getStorageCost(uint256 size) public view returns (uint256) {
+        (, int256 price, , , ) = priceFeed.latestRoundData();
+        return
+            size.mul(1 ether).div(_costOfStorage.mul(uint256(price)).div(1e8));
     }
 
     function getAvailableSpace(address _address)
@@ -159,7 +171,7 @@ contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
 
     /*
      *  @dev
-     * ```Remove Coin```
+     * ```Update Storage```
 
      * Args:
      *  user Address
@@ -174,6 +186,34 @@ contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
         uint256 filesize,
         string calldata fileHash
     ) public ManagerorOwner {
+        storageList[user].fileHashs.push(fileHash);
+        storageList[user].totalStored = storageList[user].totalStored.add(
+            filesize
+        );
+        storageList[user].availableStorage = storageList[user]
+            .availableStorage
+            .sub(filesize);
+    }
+
+    /*
+     *  @dev
+     * ```instant Storage```
+
+     * Args:
+     *  user Address
+     *  fileSize
+     *  file CID
+     *
+     *
+     */
+
+    function instantStorage(
+        address user,
+        uint256 filesize,
+        string calldata fileHash
+    ) public payable {
+        assert(msg.value >= getStorageCost(filesize));
+        _updateAvailableStorage(msg.sender, filesize);
         storageList[user].fileHashs.push(fileHash);
         storageList[user].totalStored = storageList[user].totalStored.add(
             filesize
