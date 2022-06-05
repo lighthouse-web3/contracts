@@ -102,7 +102,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     function getStorageCost(uint256 size) public view returns (uint256) {
         (, int256 price, , , ) = priceFeed.latestRoundData();
         return
-            size.mul(1 ether).div(_costOfStorage.mul(uint256(price)).div(1e8));
+            size.mul(1 ether).mul(1e8).div(_costOfStorage.mul(uint256(price)));
     }
 
     function getAvailableSpace(address _address)

@@ -4,13 +4,16 @@ pragma solidity ^0.8.4;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "./interfaces/Stargate/IStargateRouter.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
+    AggregatorV3Interface internal priceFeed;
+    using SafeMathUpgradeable for uint256;
     using AddressUpgradeable for address;
 
     uint8 public constant TYPE_SWAP_REMOTE = 1;
@@ -39,6 +42,9 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
         __Ownable_init();
         slippageProtectionOut = 2000;
         stargateRouter = _stargateRouter;
+        priceFeed = AggregatorV3Interface(
+            0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
+        );
         for (uint256 index = 0; index < ids.length; index++) {
             pids[tokens[index]] = ids[index];
         }
@@ -49,6 +55,23 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
         override
         onlyOwner
     {}
+
+    function getPrice() public view returns (uint256) {
+        (
+            uint80 roundID,
+            int256 price,
+            uint256 startedAt,
+            uint256 timeStamp,
+            uint80 answeredInRound
+        ) = priceFeed.latestRoundData();
+        return (uint256(price));
+    }
+
+    function getStorageCost(uint256 size) public view returns (uint256) {
+        (, int256 price, , , ) = priceFeed.latestRoundData();
+        uint256 _costOfStorage = 214748365;
+        return size.mul(1 ether).mul(1e8).div(_costOfStorage.mul(uint256(price)));
+    }
 
     function _changeStargateRouter(address _router) external onlyOwner {
         require(_router != address(0), "Must be validly address");
@@ -61,11 +84,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     //get the expected gas fee\
-    function getSwapFee(uint16 _dstChainId)
-        public
-        view
-        returns (uint256)
-    {
+    function getSwapFee(uint16 _dstChainId) public view returns (uint256) {
         bytes memory _toAddress = abi.encodePacked(_msgSender());
 
         (uint256 nativeFee, ) = IStargateRouter(stargateRouter)
@@ -102,15 +121,12 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
         require(pid != 0, "Asset Not Added");
 
         uint256 qty = _amount;
-       uint256 amountOutMin = getMinOut(_amount);
+        uint256 amountOutMin = getMinOut(_amount);
 
         bytes memory _toAddress = abi.encode(_msgSender());
         bytes memory data = abi.encodePacked();
 
-        require(
-            msg.value >= getSwapFee(chainId),
-            "Not enough funds for gas"
-        );
+        require(msg.value >= getSwapFee(chainId), "Not enough funds for gas");
 
         IERC20Upgradeable(_asset).transferFrom(
             _msgSender(),
@@ -160,7 +176,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
     /// @notice Sweep function in case any tokens get stuck in the contract
     /// @param _asset Address of the token to sweep
     function sweep(address _asset) external onlyOwner {
-        IERC20Upgradeable(_asset).safeTransfer(
+        IERC20Upgradeable(_asset).transfer(
             msg.sender,
             IERC20Upgradeable(_asset).balanceOf(address(this))
         );
