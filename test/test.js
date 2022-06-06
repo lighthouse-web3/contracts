@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 const crypto = require("crypto");
 
 let Lighthouse,
@@ -23,12 +23,16 @@ beforeEach(async () => {
   Deposit = await ethers.getContractFactory(
     "contracts/DepositManager.sol:DepositManager"
   );
-  deposit = await Deposit.deploy();
+  deposit = await upgrades.deployProxy(Deposit, { kind: "uups" });
 
   Lighthouse = await ethers.getContractFactory(
     "contracts/Lighthouse.sol:Lighthouse"
   );
-  lighthouse = await Lighthouse.deploy(deposit.address);
+  lighthouse = await upgrades.deployProxy(
+    Lighthouse,
+    [deposit.address],
+    { kind: "uups", }
+  );
 
   StableCoin = await ethers.getContractFactory("Dai");
   stableCoin = await StableCoin.deploy();
@@ -133,22 +137,49 @@ describe("LighthouseContract", () => {
     const timestamps = [...Array(100).keys()];
 
     const structarr = [];
-    structarr.push([
-      users[0],
-      cid_bundles[0],
-      config[0],
-      fileName[0],
-      fileSize[0],
-      timestamps[0],
-    ]);
-    structarr.push([
-      users[0],
-      cid_bundles[1],
-      config[1],
-      fileName[1],
-      fileSize[1],
-      timestamps[1],
-    ]);
+
+    await lighthouse.bundleStore(structarr);
+
+    for (let i = 0; i < cid_bundles.length; ++i) {
+      structarr.push([
+        users[i],
+        cid_bundles[i],
+        "",
+        fileName[i],
+        fileSize[i],
+        timestamps[i],
+      ]);
+    }
+    let chunk = 100;
+    const length = structarr.length;
+    for (let i = 0; i < length; i += chunk) {
+      const chunkarr = structarr.slice(i, i + chunk);
+      await lighthouse.bundleStore(chunkarr);
+    }
+  });
+
+
+  it("test edgeCase", async () => {
+    await deposit.updateAvailableStorage(
+      "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
+      1e2
+    );
+
+    const cid_bundles = [...Array(100).keys()].fill(
+      "0x3fd54831f488a22b28398de0c567a3b064b937f54f81739ae9bd545967f3abaa",
+      0,
+      1e6
+    );
+    const config = [...Array(100).keys()].fill("config", 0, 1000);
+    const users = [...Array(100).keys()].fill(
+      "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
+      0,
+      1000
+    );
+    const fileName = [...Array(100).keys()].fill("fileName", 0, 1000);
+    const fileSize = [...Array(100).keys()];
+    const timestamps = [...Array(100).keys()];
+    const structarr = [];
 
     await lighthouse.bundleStore(structarr);
 
@@ -269,20 +300,5 @@ describe("LighthouseContract", () => {
     data = await stableCoin.balanceOf(deposit.address);
 
     expect(data).to.equal(0);
-  });
-
-  it("Transfer OwnerShip", async () => {
-    let tx = await deposit.changeOwner(account3.address);
-    await tx.wait();
-
-    let data = await deposit.owner();
-    expect(data).to.equal(account3.address);
-
-    try {
-      tx = await deposit.changeOwner(account4.address);
-      await tx.wait();
-    } catch (e) {
-      expect(e.message).to.include("Ownable: caller is not the owner");
-    }
   });
 });

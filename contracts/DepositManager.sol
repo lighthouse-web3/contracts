@@ -3,8 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract DepositManager {
+contract DepositManager is OwnableUpgradeable,UUPSUpgradeable {
     using SafeMath for uint256;
 
     /**
@@ -29,14 +32,15 @@ contract DepositManager {
         address indexed whitelistAddress,
         bool indexed status
     );
-
-    address private _owner;
-    uint256 private _costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
+    uint256 private _costOfStorage ;
 
     mapping(address => Deposit[]) public deposits;
     mapping(address => Storage) public storageList;
     mapping(address => bool) private whiteListedAddr;
     mapping(address => uint256) private stableCoinRate;
+
+
+
 
     struct Deposit {
         uint256 timestamp;
@@ -49,10 +53,14 @@ contract DepositManager {
         uint256 totalStored;
         uint256 availableStorage;
     }
-
-    constructor() {
-        _owner = msg.sender;
+    function initialize() initializer public{
+        __Ownable_init();
+        _costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
     }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner{
+    }
+
 
     function addDeposit(address _coinAddress, uint256 _amount) external {
         address wallet = msg.sender;
@@ -191,24 +199,12 @@ contract DepositManager {
         );
     }
 
-    /**@dev transfer OwnerShip*/
-    function changeOwner(address _newOwner) external onlyOwner {
-        _owner = _newOwner;
-    }
-
     function setWhiteListAddr(address _address, bool _status)
         external
         onlyOwner
     {
         whiteListedAddr[_address] = _status;
         emit whiteListingAddressEvent(_address, _status);
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view virtual returns (address) {
-        return _owner;
     }
 
     /**
@@ -230,18 +226,6 @@ contract DepositManager {
             whiteListedAddr[msg.sender] || msg.sender == owner(),
             "Account Not Whitelisted"
         );
-        _;
-    }
-
-    /*
-     * @dev
-     * modifier```onlyOwner```
-     *
-     * Requirement:
-     * - only callable by owner
-     */
-    modifier onlyOwner() {
-        require(owner() == msg.sender, "Ownable: caller is not the owner");
         _;
     }
 }
