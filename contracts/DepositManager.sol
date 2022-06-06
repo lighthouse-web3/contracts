@@ -100,6 +100,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     function getStorageCost(uint256 size) public view returns (uint256) {
+        require(address(priceFeed)!=address(0),"price feed not set")
         (, int256 price, , , ) = priceFeed.latestRoundData();
         return
             size.mul(1 ether).mul(1e8).div(_costOfStorage.mul(uint256(price)));
