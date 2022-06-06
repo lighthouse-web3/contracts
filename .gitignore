@@ -1,6 +1,5 @@
 node_modules
 .env
-artifacts
 cache
 bin
 package-lock.json
