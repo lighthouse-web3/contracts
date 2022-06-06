@@ -17,12 +17,12 @@ beforeEach(async () => {
   owner = owner.address;
 
   Deposit = await ethers.getContractFactory(
-    "contracts/DepositManager.sol:DepositManager"
+    "contracts/core/DepositManager.sol:DepositManager"
   );
   deposit = await upgrades.deployProxy(Deposit, { kind: "uups" });
 
   Lighthouse = await ethers.getContractFactory(
-    "contracts/Lighthouse.sol:Lighthouse"
+    "contracts/core/Lighthouse.sol:Lighthouse"
   );
   lighthouse = await upgrades.deployProxy(Lighthouse, [deposit.address], {
     kind: "uups",
