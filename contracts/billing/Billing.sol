@@ -20,11 +20,7 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         __Ownable_init();
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyOwner
-    {
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
         emit UpdateContract(_msgSender(), newImplementation);
     }
 
@@ -44,12 +40,7 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
     /// @dev this function disables the flag isActive making it impossible for new orders on the subscription with the specified ID
     /// @
     /// @param subID the ID/index of the SystemDefinedSubscription in contractSubscriptions
-    function cancelSystemSubscription(uint64 subID)
-        external
-        virtual
-        override
-        onlyOwner
-    {
+    function cancelSystemSubscription(uint64 subID) external virtual override onlyOwner {
         assert(contractSubscriptions[subID].isActive != false);
         contractSubscriptions[subID].isActive = false;
     }
@@ -57,29 +48,18 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
     /// @dev this function allows the owner to set stable coins allowed on this contract
     /// @param tokenAddress token Address of the stableCoin
     /// @param _stableCoin stableCoin struct containing the preset rate and its status
-    function addStableCoin(
-        address tokenAddress,
-        StableCoinState calldata _stableCoin
-    ) external onlyOwner {
+    function addStableCoin(address tokenAddress, StableCoinState calldata _stableCoin) external onlyOwner {
         assert(tokenAddress != address(0));
         assert(stableCoinStatus[tokenAddress].rate == 0);
         stableCoinStatus[tokenAddress] = _stableCoin;
-        emit StableCoinStatus(
-            _msgSender(),
-            tokenAddress,
-            _stableCoin.rate,
-            _stableCoin.isActive
-        );
+        emit StableCoinStatus(_msgSender(), tokenAddress, _stableCoin.rate, _stableCoin.isActive);
     }
 
     /// @dev this function is contingency place to align with the growth of the
     ///    underlying blockchain if average BlockNumber produced increases
     /// @param subscriptionId the Subscription index on the contractSubscriptions[list]
     /// @param increase amount of blocks you would like to add
-    function increaseBlockNumber(uint96 subscriptionId, uint32 increase)
-        external
-        onlyOwner
-    {
+    function increaseBlockNumber(uint96 subscriptionId, uint32 increase) external onlyOwner {
         assert(contractSubscriptions[subscriptionId].deductionIN > 0);
         contractSubscriptions[subscriptionId].deductionIN =
             contractSubscriptions[subscriptionId].deductionIN +
@@ -116,17 +96,10 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
 
     /// @dev this function calculates the amount cost of a subscription relate
     /// to the rate of the stablecoin specified
-    /// @param tokenAddress Address of the token 
+    /// @param tokenAddress Address of the token
     /// @param subscriptionID the ID/index of the SystemDefinedSubscription in contractSubscriptions
-    function getAmountToBeDeducted(address tokenAddress, uint64 subscriptionID)
-        public
-        view
-        returns (uint256)
-    {
-        require(
-            stableCoinStatus[tokenAddress].rate > 0,
-            "TokenAddress Not Acceptable HERE"
-        );
+    function getAmountToBeDeducted(address tokenAddress, uint64 subscriptionID) public view returns (uint256) {
+        require(stableCoinStatus[tokenAddress].rate > 0, "TokenAddress Not Acceptable HERE");
         return
             uint256(
                 contractSubscriptions[subscriptionID].amount *
@@ -135,73 +108,45 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
             ).div(RATE_DENOMINATOR * RATE_DENOMINATOR);
     }
 
-
     /// @dev this function checks if the address(account) has an activate subscription
     /// and manages possible renewal and returns a bool if its active
     /// @param account Address of the user your are checking
     function purchaseSubscription(address account) internal returns (bool) {
         UserSubscription storage subscription = userToSubscription[account];
-        require(
-            subscription.occuranceLeft > 0,
-            "subscription expired or doesn't exist"
-        );
+        require(subscription.occuranceLeft > 0, "subscription expired or doesn't exist");
         require(
             block.number - subscription.lastDebit >
-                contractSubscriptions[subscription.systemDefinedSubscriptionID]
-                    .frequencyOfDeduction
+                contractSubscriptions[subscription.systemDefinedSubscriptionID].frequencyOfDeduction
         );
         if (
-            IERC20MetadataUpgradeable(subscription.tokenAddress).balanceOf(
-                _msgSender()
-            ) <
-            getAmountToBeDeducted(
-                subscription.tokenAddress,
-                subscription.systemDefinedSubscriptionID
-            )
+            IERC20MetadataUpgradeable(subscription.tokenAddress).balanceOf(_msgSender()) <
+            getAmountToBeDeducted(subscription.tokenAddress, subscription.systemDefinedSubscriptionID)
         ) {
             return false;
         }
         IERC20Upgradeable(subscription.tokenAddress).transferFrom(
             account,
             address(this),
-            getAmountToBeDeducted(
-                subscription.tokenAddress,
-                subscription.systemDefinedSubscriptionID
-            )
+            getAmountToBeDeducted(subscription.tokenAddress, subscription.systemDefinedSubscriptionID)
         );
         subscription.occuranceLeft = subscription.occuranceLeft - 1;
         subscription.lastDebit = uint96(block.number);
-        emit Purchase(
-            account,
-            subscription.systemDefinedSubscriptionID,
-            subscription.tokenAddress
-        );
+        emit Purchase(account, subscription.systemDefinedSubscriptionID, subscription.tokenAddress);
         return true;
     }
-
 
     /// @dev this function adds a user to a valid subscription plan
     /// @param tokenAddress token address you want to pay with
     /// @param systemDefinedSubscriptionId the ID/index of the SystemDefinedSubscription in contractSubscriptions you want to join
-    function activateSubscription(
-        uint64 systemDefinedSubscriptionId,
-        address tokenAddress
-    ) external returns (bool) {
+    function activateSubscription(uint64 systemDefinedSubscriptionId, address tokenAddress) external returns (bool) {
         assert(stableCoinStatus[tokenAddress].isActive == true);
-        SystemDefinedSubscription storage subscription = contractSubscriptions[
-            systemDefinedSubscriptionId
-        ];
+        SystemDefinedSubscription storage subscription = contractSubscriptions[systemDefinedSubscriptionId];
         require(subscription.isActive == true, "this offer has expired");
         assert(userToSubscription[_msgSender()].occuranceLeft == 0);
-        uint256 amountTOBeDeducted = getAmountToBeDeducted(
-            tokenAddress,
-            systemDefinedSubscriptionId
-        );
+        uint256 amountTOBeDeducted = getAmountToBeDeducted(tokenAddress, systemDefinedSubscriptionId);
         require(
-            IERC20MetadataUpgradeable(tokenAddress).allowance(
-                _msgSender(),
-                address(this)
-            ) >= subscription.frequencyOfDeduction * amountTOBeDeducted,
+            IERC20MetadataUpgradeable(tokenAddress).allowance(_msgSender(), address(this)) >=
+                subscription.frequencyOfDeduction * amountTOBeDeducted,
             "Increase Allowance to match subscription"
         );
         userToSubscription[_msgSender()] = UserSubscription(
@@ -215,31 +160,19 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         return purchaseSubscription(_msgSender());
     }
 
-
     /// @dev this checks subscriptions
     /// @param account address of the user you want too look up
-    function _isSubscriptionActive(address account)
-        public
-        returns (bool, uint64)
-    {
+    function _isSubscriptionActive(address account) public returns (bool, uint64) {
         if (userToSubscription[_msgSender()].lastDebit == 0) {
             return (false, type(uint64).max);
         }
         if (
             block.number - userToSubscription[account].lastDebit <=
-            contractSubscriptions[
-                userToSubscription[account].systemDefinedSubscriptionID
-            ].deductionIN
+            contractSubscriptions[userToSubscription[account].systemDefinedSubscriptionID].deductionIN
         ) {
-            return (
-                true,
-                userToSubscription[account].systemDefinedSubscriptionID
-            );
+            return (true, userToSubscription[account].systemDefinedSubscriptionID);
         } else {
-            return (
-                purchaseSubscription(account),
-                userToSubscription[account].systemDefinedSubscriptionID
-            );
+            return (purchaseSubscription(account), userToSubscription[account].systemDefinedSubscriptionID);
         }
     }
 
@@ -250,20 +183,12 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         emit SubscriptionStatus(account, status, id);
     }
 
-
     /// @dev this function cancels Subscription renewal for a user
     function cancelSubscription() external {
-        require(
-            userToSubscription[_msgSender()].occuranceLeft != 0,
-            "No active subscription"
-        );
+        require(userToSubscription[_msgSender()].occuranceLeft != 0, "No active subscription");
         userToSubscription[_msgSender()].occuranceLeft = 0;
         userToSubscription[_msgSender()].isCancelled = true;
-        IERC20Upgradeable(userToSubscription[_msgSender()].tokenAddress)
-            .approve(address(this), 0);
-        emit CancelSubscription(
-            _msgSender(),
-            userToSubscription[_msgSender()].systemDefinedSubscriptionID
-        );
+        IERC20Upgradeable(userToSubscription[_msgSender()].tokenAddress).approve(address(this), 0);
+        emit CancelSubscription(_msgSender(), userToSubscription[_msgSender()].systemDefinedSubscriptionID);
     }
 }

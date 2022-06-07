@@ -30,10 +30,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
      *
      * Note that `value` may be zero.
      */
-    event whiteListingAddressEvent(
-        address indexed whitelistAddress,
-        bool indexed status
-    );
+    event whiteListingAddressEvent(address indexed whitelistAddress, bool indexed status);
     uint256 private _costOfStorage;
 
     mapping(address => Deposit[]) public deposits;
@@ -59,37 +56,20 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         _costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyOwner
-    {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function addDeposit(address _coinAddress, uint256 _amount) external {
         address wallet = msg.sender;
         uint256 decimals = IERC20Metadata(_coinAddress).decimals();
         require(stableCoinRate[_coinAddress] != 0, "suggest coin to Admin");
-        require(
-            IERC20(_coinAddress).balanceOf(wallet) >= _amount,
-            "insufficent Balance"
+        require(IERC20(_coinAddress).balanceOf(wallet) >= _amount, "insufficent Balance");
+        uint256 storagePurchased = _amount.mul(stableCoinRate[_coinAddress]).mul(costOfStorage()).div(10**decimals).div(
+            10**6
         );
-        uint256 storagePurchased = _amount
-            .mul(stableCoinRate[_coinAddress])
-            .mul(costOfStorage())
-            .div(10**decimals)
-            .div(10**6);
-        deposits[msg.sender].push(
-            Deposit(block.timestamp, _amount, storagePurchased)
-        );
+        deposits[msg.sender].push(Deposit(block.timestamp, _amount, storagePurchased));
         _updateAvailableStorage(msg.sender, storagePurchased);
         IERC20(_coinAddress).transferFrom(wallet, address(this), _amount);
-        emit AddDepositEvent(
-            msg.sender,
-            _coinAddress,
-            _amount,
-            _costOfStorage,
-            storagePurchased
-        );
+        emit AddDepositEvent(msg.sender, _coinAddress, _amount, _costOfStorage, storagePurchased);
     }
 
     /** 
@@ -120,8 +100,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     function getStorageCost(uint256 size) public view returns (uint256) {
         require(address(priceFeed) != address(0), "price feed not set");
         (, int256 price, , , ) = priceFeed.latestRoundData();
-        return
-            size.mul(1 ether).mul(1e8).div(_costOfStorage.mul(uint256(price)));
+        return size.mul(1 ether).mul(1e8).div(_costOfStorage.mul(uint256(price)));
     }
 
     /** 
@@ -129,11 +108,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
 
     * @param _address the address of the account you want to look up
     */
-    function getAvailableSpace(address _address)
-        external
-        view
-        returns (uint256)
-    {
+    function getAvailableSpace(address _address) external view returns (uint256) {
         return storageList[_address].availableStorage;
     }
 
@@ -208,12 +183,8 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         string calldata fileHash
     ) public ManagerorOwner {
         storageList[user].fileHashs.push(fileHash);
-        storageList[user].totalStored = storageList[user].totalStored.add(
-            filesize
-        );
-        storageList[user].availableStorage = storageList[user]
-            .availableStorage
-            .sub(filesize);
+        storageList[user].totalStored = storageList[user].totalStored.add(filesize);
+        storageList[user].availableStorage = storageList[user].availableStorage.sub(filesize);
     }
 
     /**
@@ -235,43 +206,29 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         assert(msg.value >= getStorageCost(filesize));
         _updateAvailableStorage(msg.sender, filesize);
         storageList[user].fileHashs.push(fileHash);
-        storageList[user].totalStored = storageList[user].totalStored.add(
-            filesize
-        );
-        storageList[user].availableStorage = storageList[user]
-            .availableStorage
-            .sub(filesize);
+        storageList[user].totalStored = storageList[user].totalStored.add(filesize);
+        storageList[user].availableStorage = storageList[user].availableStorage.sub(filesize);
     }
 
     /**
      * @dev this is an restricted function that increases the storage assigned to a user
      */
-    function updateAvailableStorage(address user, uint256 addOnStorage)
-        public
-        ManagerorOwner
-    {
+    function updateAvailableStorage(address user, uint256 addOnStorage) public ManagerorOwner {
         _updateAvailableStorage(user, addOnStorage);
     }
 
     /**
      * @dev this is an internal function that increases the storage assigned to a user
      */
-    function _updateAvailableStorage(address user, uint256 addOnStorage)
-        internal
-    {
+    function _updateAvailableStorage(address user, uint256 addOnStorage) internal {
         Storage storage storagePointer = storageList[user];
-        storagePointer.availableStorage = storagePointer.availableStorage.add(
-            addOnStorage
-        );
+        storagePointer.availableStorage = storagePointer.availableStorage.add(addOnStorage);
     }
 
     /**
      * @dev this function set the whitelisted status of an address and emits and event
      */
-    function setWhiteListAddr(address _address, bool _status)
-        external
-        onlyOwner
-    {
+    function setWhiteListAddr(address _address, bool _status) external onlyOwner {
         whiteListedAddr[_address] = _status;
         emit whiteListingAddressEvent(_address, _status);
     }
@@ -291,10 +248,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
      * - Reject direct from non whitelisted addresses
      */
     modifier ManagerorOwner() {
-        require(
-            whiteListedAddr[msg.sender] || msg.sender == owner(),
-            "Account Not Whitelisted"
-        );
+        require(whiteListedAddr[msg.sender] || msg.sender == owner(), "Account Not Whitelisted");
         _;
     }
 }

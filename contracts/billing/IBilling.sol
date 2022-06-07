@@ -32,11 +32,7 @@ interface IBilling {
      *
      * Note  account must a subscription
      */
-    event Purchase(
-        address indexed account,
-        uint256 indexed subscriptionID,
-        address indexed tokenAddress
-    );
+    event Purchase(address indexed account, uint256 indexed subscriptionID, address indexed tokenAddress);
 
     /**
      * @dev Emitted blockNumber deduction duration is modified
@@ -44,11 +40,7 @@ interface IBilling {
      *
      * Note  account must a subscription
      */
-    event IncreaseBlockNumber(
-        address indexed account,
-        uint96 indexed subscriptionID,
-        uint32 indexed increase
-    );
+    event IncreaseBlockNumber(address indexed account, uint96 indexed subscriptionID, uint32 indexed increase);
 
     /**
      * @dev Emitted when contract is Updated
@@ -56,10 +48,7 @@ interface IBilling {
      *
      * Note  account must a subscription
      */
-    event UpdateContract(
-        address indexed updateBy,
-        address indexed subscriptionID
-    );
+    event UpdateContract(address indexed updateBy, address indexed subscriptionID);
 
     /**
      * @dev Emitted when a Subcription is cancelled
@@ -67,11 +56,7 @@ interface IBilling {
      *
      * Note  account must a subscription
      */
-    event SubscriptionStatus(
-        address indexed account,
-        bool active,
-        uint64 indexed subscriptionID
-    );
+    event SubscriptionStatus(address indexed account, bool active, uint64 indexed subscriptionID);
 
     /**
      * @dev Emitted when a withdraw approval is given
@@ -79,11 +64,7 @@ interface IBilling {
      *
      * Note  account must a subscription
      */
-    event withdrawApproval(
-        address indexed account,
-        address indexed tokenAddress,
-        uint256 indexed amount
-    );
+    event withdrawApproval(address indexed account, address indexed tokenAddress, uint256 indexed amount);
 
     /**
      * @dev Emitted when a Subcription is cancelled
@@ -91,10 +72,7 @@ interface IBilling {
      *
      * Note  account must a subscription
      */
-    event CancelSubscription(
-        address indexed account,
-        uint256 indexed subscriptionID
-    );
+    event CancelSubscription(address indexed account, uint256 indexed subscriptionID);
 
     /**
      * @dev Emitted when a Subcription is cancelled
@@ -102,16 +80,9 @@ interface IBilling {
      *
      * Note  account must a subscription
      */
-    event StableCoinStatus(
-        address indexed from,
-        address indexed tokenAddress,
-        uint64 rate,
-        bool indexed isActive
-    );
+    event StableCoinStatus(address indexed from, address indexed tokenAddress, uint64 rate, bool indexed isActive);
 
-    function createSystemSubscription(SystemDefinedSubscription calldata _sub)
-        external
-        returns (uint64);
+    function createSystemSubscription(SystemDefinedSubscription calldata _sub) external returns (uint64);
 
     function cancelSystemSubscription(uint64 id) external;
 }

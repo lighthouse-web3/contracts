@@ -26,12 +26,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
     uint256 slippageProtectionOut; //out of 10000. 50 = 0.5%
     uint256 constant DENOMINATOR = 10_000;
 
-    event sgReceived(
-        uint16 _chainId,
-        bytes _srcAddress,
-        address _token,
-        uint256 amountLD
-    );
+    event sgReceived(uint16 _chainId, bytes _srcAddress, address _token, uint256 amountLD);
 
     function initialize(
         address _stargateRouter,
@@ -42,28 +37,17 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
         __Ownable_init();
         slippageProtectionOut = 2000;
         stargateRouter = _stargateRouter;
-        priceFeed = AggregatorV3Interface(
-            0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
-        );
+        priceFeed = AggregatorV3Interface(0x8A753747A1Fa494EC906cE90E9f37563A8AF630e);
         for (uint256 index = 0; index < ids.length; index++) {
             pids[tokens[index]] = ids[index];
         }
     }
 
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override
-        onlyOwner
-    {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function getPrice() public view returns (uint256) {
-        (
-            uint80 roundID,
-            int256 price,
-            uint256 startedAt,
-            uint256 timeStamp,
-            uint80 answeredInRound
-        ) = priceFeed.latestRoundData();
+        (uint80 roundID, int256 price, uint256 startedAt, uint256 timeStamp, uint80 answeredInRound) = priceFeed
+            .latestRoundData();
         return (uint256(price));
     }
 
@@ -87,21 +71,19 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
     function getSwapFee(uint16 _dstChainId) public view returns (uint256) {
         bytes memory _toAddress = abi.encodePacked(_msgSender());
 
-        (uint256 nativeFee, ) = IStargateRouter(stargateRouter)
-            .quoteLayerZeroFee(
-                _dstChainId,
-                TYPE_SWAP_REMOTE,
-                _toAddress,
-                abi.encodePacked(),
-                IStargateRouter.lzTxObj(0, 0, "0x")
-            );
+        (uint256 nativeFee, ) = IStargateRouter(stargateRouter).quoteLayerZeroFee(
+            _dstChainId,
+            TYPE_SWAP_REMOTE,
+            _toAddress,
+            abi.encodePacked(),
+            IStargateRouter.lzTxObj(0, 0, "0x")
+        );
 
         return nativeFee;
     }
 
     function getMinOut(uint256 _amountIn) internal view returns (uint256) {
-        return
-            (_amountIn * (DENOMINATOR - slippageProtectionOut)) / DENOMINATOR;
+        return (_amountIn * (DENOMINATOR - slippageProtectionOut)) / DENOMINATOR;
     }
 
     //call the swap function to swap accorss chains
@@ -111,11 +93,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
         uint256 _amount,
         address _destinationComposer
     ) external payable onlyOwner returns (bool) {
-        require(
-            IERC20Upgradeable(_asset).allowance(_msgSender(), address(this)) >=
-                _amount,
-            "Allowance not adequate"
-        );
+        require(IERC20Upgradeable(_asset).allowance(_msgSender(), address(this)) >= _amount, "Allowance not adequate");
 
         uint256 pid = pids[_asset];
         require(pid != 0, "Asset Not Added");
@@ -128,13 +106,9 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
 
         require(msg.value >= getSwapFee(chainId), "Not enough funds for gas");
 
-        IERC20Upgradeable(_asset).transferFrom(
-            _msgSender(),
-            address(this),
-            _amount
-        );
+        IERC20Upgradeable(_asset).transferFrom(_msgSender(), address(this), _amount);
         IERC20Upgradeable(_asset).approve(stargateRouter, qty);
-        IStargateRouter(stargateRouter).swap{value: msg.value}(
+        IStargateRouter(stargateRouter).swap{ value: msg.value }(
             chainId, // send to Fuji (use LayerZero chainId)
             pid, // source pool id
             pid, // dest pool id
@@ -164,10 +138,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
         uint256 amountLD,
         bytes memory _payload
     ) external {
-        require(
-            msg.sender == address(stargateRouter),
-            "only stargate router can call sgReceive!"
-        );
+        require(msg.sender == address(stargateRouter), "only stargate router can call sgReceive!");
         address _toAddr = abi.decode(_payload, (address));
         IERC20Upgradeable(_token).transfer(_toAddr, amountLD);
         emit sgReceived(_chainId, _srcAddress, _token, amountLD);
@@ -176,10 +147,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
     /// @notice Sweep function in case any tokens get stuck in the contract
     /// @param _asset Address of the token to sweep
     function sweep(address _asset) external onlyOwner {
-        IERC20Upgradeable(_asset).transfer(
-            msg.sender,
-            IERC20Upgradeable(_asset).balanceOf(address(this))
-        );
+        IERC20Upgradeable(_asset).transfer(msg.sender, IERC20Upgradeable(_asset).balanceOf(address(this)));
     }
 
     receive() external payable {}

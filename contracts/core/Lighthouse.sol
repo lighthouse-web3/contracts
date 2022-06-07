@@ -7,9 +7,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-
-contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
-
+contract Lighthouse is OwnableUpgradeable, UUPSUpgradeable {
     IDepositManager public Deposit;
     uint256 bundleStoreID;
 
@@ -54,12 +52,12 @@ contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
 
     mapping(string => Status) public statuses; // cid -> Status
 
-    function initialize(address _deposit) initializer public{
+    function initialize(address _deposit) public initializer {
         __Ownable_init();
-         Deposit = IDepositManager(_deposit);
+        Deposit = IDepositManager(_deposit);
     }
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner{
-    }
+
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function store(
         string calldata cid,
@@ -87,36 +85,17 @@ contract Lighthouse is OwnableUpgradeable , UUPSUpgradeable {
         Content[] memory failedUpload = new Content[](contents.length);
         uint256 failedCount = 0;
         for (uint256 i = 0; i < contents.length; i++) {
-            if (
-                Deposit.getAvailableSpace(contents[i].user) >=
-                contents[i].fileSize
-            ) {
-                Deposit.updateStorage(
-                    contents[i].user,
-                    contents[i].fileSize,
-                    contents[i].cid
-                );
+            if (Deposit.getAvailableSpace(contents[i].user) >= contents[i].fileSize) {
+                Deposit.updateStorage(contents[i].user, contents[i].fileSize, contents[i].cid);
             } else {
                 failedUpload[failedCount] = contents[i];
                 failedCount += 1;
             }
         }
 
-        emit BundleStorageRequest(
-            bundleStoreID,
-            msg.sender,
-            contents,
-            failedCount == 0,
-            block.timestamp
-        );
+        emit BundleStorageRequest(bundleStoreID, msg.sender, contents, failedCount == 0, block.timestamp);
         if (failedCount != 0) {
-            emit BundleStorageResponse(
-                bundleStoreID,
-                false,
-                failedCount,
-                failedUpload,
-                block.timestamp
-            );
+            emit BundleStorageResponse(bundleStoreID, false, failedCount, failedUpload, block.timestamp);
         }
     }
 

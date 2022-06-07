@@ -8,9 +8,7 @@ interface IDepositManager {
     /**
      * @dev Purchase Storage from with accepted stable coin
      */
-    function addDeposit(address _coinAddress, uint256 _amount)
-        external
-        returns (bool);
+    function addDeposit(address _coinAddress, uint256 _amount) external returns (bool);
 
     /**
      * @dev set Cost of Storagr
@@ -95,10 +93,7 @@ interface IDepositManager {
      * Returns:
      * uint: Available Storage
      */
-    function getAvailableSpace(address _address)
-        external
-        view
-        returns (uint256);
+    function getAvailableSpace(address _address) external view returns (uint256);
 
     /*
      * @dev
