@@ -48,9 +48,10 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     }
 
     struct Storage {
-        string[] fileHashs;
         uint256 totalStored;
         uint256 availableStorage;
+        bool isNewUser;
+        string[] fileHashs;
     }
 
     function initialize() public initializer {
@@ -91,21 +92,43 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         );
     }
 
+    /** 
+    * @dev the function intializated the priceFeed Aggregator
+    * see {chainlink for more}
+
+    * @param aggregatorAddressFeed designated chainlink priceFeed address
+    */
     function changePriceFeed(address aggregatorAddressFeed) public onlyOwner {
         priceFeed = AggregatorV3Interface(aggregatorAddressFeed);
     }
 
+    /** 
+    * @dev the function allows the owner to modify the cost of storage
+
+    * @param newCost value to update cost to 
+    */
     function changeCostOfStorage(uint256 newCost) public onlyOwner {
         _costOfStorage = newCost;
     }
 
+    /** 
+    * @dev this function calculates the cosr of storage in native eth
+    * see {chainlink for more}
+
+    * @param size the size of the file
+    */
     function getStorageCost(uint256 size) public view returns (uint256) {
-        require(address(priceFeed)!=address(0),"price feed not set");
+        require(address(priceFeed) != address(0), "price feed not set");
         (, int256 price, , , ) = priceFeed.latestRoundData();
         return
             size.mul(1 ether).mul(1e8).div(_costOfStorage.mul(uint256(price)));
     }
 
+    /** 
+    * @dev this function returns the available storage of a specified account/address
+
+    * @param _address the address of the account you want to look up
+    */
     function getAvailableSpace(address _address)
         external
         view
@@ -114,7 +137,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         return storageList[_address].availableStorage;
     }
 
-    /*
+    /**
      * @dev
      * Transfer balance to a designated Account
      */
@@ -127,14 +150,14 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         IERC20(_coinAddress).transfer(wallet, amount);
     }
 
-    /*
+    /**
      * @dev
      * ```Add Coin```
      *  Set rate for coins
 
-     * Args:
-     * coinAddress on the Network
-     * Rate: kindly see Not below
+     * 
+     * @param _coinAddress token address on the Network
+     * @param rate a preset rate 
      *
      *
      * Requirement:
@@ -142,7 +165,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
      * - rate can't be set to Zero
      *
      * Note: rate is to 6 decimal place
-     *  this implies if rate is @0.992 per $
+     *  this implies if rate is @ 0.992 per $
      *  rate should be set to 0.992*10^6 = 922000
      */
     function addCoin(address _coinAddress, uint256 rate) external onlyOwner {
@@ -151,12 +174,11 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         stableCoinRate[_coinAddress] = rate;
     }
 
-    /*
+    /**
      * @dev
      * ```Remove Coin```
 
-     * Args:
-     * coinAddress on the Network
+     * @param _coinAddress token on the Network
      *
      *
      * Requirement:
@@ -170,15 +192,13 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         stableCoinRate[_coinAddress] = 0;
     }
 
-    /*
+    /**
      *  @dev
      * ```Update Storage```
 
-     * Args:
-     *  user Address
-     *  fileSize
-     *  file CID
-     *
+     *  @param user user Address
+     *  @param filesize size of the file
+     *  @param fileHash CID
      *
      */
 
@@ -196,14 +216,13 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
             .sub(filesize);
     }
 
-    /*
+    /**
      *  @dev
-     * ```instant Storage```
+     * ```instant Storage``` purchase storage on the go with nativeEth
 
-     * Args:
-     *  user Address
-     *  fileSize
-     *  file CID
+     *  @param user user's Address
+     *  @param filesize filesize
+     *  @param fileHash CID
      *
      *
      */
@@ -224,6 +243,9 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
             .sub(filesize);
     }
 
+    /**
+     * @dev this is an restricted function that increases the storage assigned to a user
+     */
     function updateAvailableStorage(address user, uint256 addOnStorage)
         public
         ManagerorOwner
@@ -231,6 +253,9 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         _updateAvailableStorage(user, addOnStorage);
     }
 
+    /**
+     * @dev this is an internal function that increases the storage assigned to a user
+     */
     function _updateAvailableStorage(address user, uint256 addOnStorage)
         internal
     {
@@ -240,6 +265,9 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         );
     }
 
+    /**
+     * @dev this function set the whitelisted status of an address and emits and event
+     */
     function setWhiteListAddr(address _address, bool _status)
         external
         onlyOwner
@@ -255,12 +283,12 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         return _costOfStorage;
     }
 
-    /*
+    /**
      * @dev
      * modifier```ManagerOrOwnerModify```
      *
      * Requirement:
-     * - Reject direct calls by user
+     * - Reject direct from non whitelisted addresses
      */
     modifier ManagerorOwner() {
         require(

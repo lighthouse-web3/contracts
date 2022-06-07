@@ -6,14 +6,16 @@ require("solidity-coverage");
 require("@nomiclabs/hardhat-waffle");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-web3");
+require("hardhat-gas-reporter")
+require("hardhat-contract-sizer")
 
-const MAINNET_RPC_URL =
-  process.env.MAINNET_RPC_URL || process.env.ALCHEMY_MAINNET_RPC_URL || "";
+const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL || process.env.ALCHEMY_MAINNET_RPC_URL || "";
 const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL || "";
 const KOVAN_RPC_URL = process.env.KOVAN_RPC_URL || "";
 const POLYGON_RPC_URL = process.env.POLYGON_RPC_URL || "";
 const MNEMONIC = process.env.MNEMONIC || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
+const REPORT_GAS = process.env.REPORT_GAS || false
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
@@ -28,7 +30,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 
 task("balance", "Prints an account's balance")
   .addParam("account", "The account's address")
-  .setAction(async (taskArgs) => {
+  .setAction(async taskArgs => {
     const account = web3.utils.toChecksumAddress(taskArgs.account);
     const balance = await web3.eth.getBalance(account);
 
@@ -110,6 +112,12 @@ module.exports = {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
     apiKey: ETHERSCAN_API_KEY,
+  },
+  gasReporter: {
+    enabled: REPORT_GAS,
+    currency: "USD",
+    outputFile: "gas-report.txt",
+    noColors: true,
   },
   namedAccounts: {
     deployer: {
