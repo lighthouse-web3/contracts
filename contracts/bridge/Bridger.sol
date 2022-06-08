@@ -46,8 +46,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function getPrice() public view returns (uint256) {
-        (uint80 roundID, int256 price, uint256 startedAt, uint256 timeStamp, uint80 answeredInRound) = priceFeed
-            .latestRoundData();
+        (, int256 price, , , ) = priceFeed.latestRoundData();
         return (uint256(price));
     }
 
