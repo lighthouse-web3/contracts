@@ -14,10 +14,6 @@ contract MyToken is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
 
     CountersUpgradeable.Counter private _tokenIdCounter;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
 
     function initialize() initializer public {
         __ERC721_init("LightHouseNFT", "LHNFT");
