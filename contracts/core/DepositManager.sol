@@ -53,6 +53,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
 
     function initialize() public initializer {
         __Ownable_init();
+        __UUPSUpgradeable_init();
         _costOfStorage = 214748365; // Byte per Dollar in these case 1gb/5$  which is eqivalent too ((1024**3) / 5)
     }
 

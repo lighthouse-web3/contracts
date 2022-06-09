@@ -54,6 +54,7 @@ contract Lighthouse is OwnableUpgradeable, UUPSUpgradeable {
 
     function initialize(address _deposit) public initializer {
         __Ownable_init();
+        __UUPSUpgradeable_init();
         Deposit = IDepositManager(_deposit);
     }
 

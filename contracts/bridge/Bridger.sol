@@ -35,6 +35,7 @@ contract Bridger is OwnableUpgradeable, UUPSUpgradeable {
     ) public initializer {
         require(tokens.length == ids.length && ids.length != 0);
         __Ownable_init();
+        __UUPSUpgradeable_init();
         slippageProtectionOut = 2000;
         stargateRouter = _stargateRouter;
         priceFeed = AggregatorV3Interface(0x8A753747A1Fa494EC906cE90E9f37563A8AF630e);

@@ -24,6 +24,7 @@ contract UniswapV3Exchange is OwnableUpgradeable, UUPSUpgradeable {
 
     function initialize(address _router, address _weth) public initializer {
         __Ownable_init();
+        __UUPSUpgradeable_init();
         uniswapRouterV3 = IUniswapRouter(_router);
         WETH_native = _weth;
         poolFees = new uint24[](3);
@@ -48,9 +49,8 @@ contract UniswapV3Exchange is OwnableUpgradeable, UUPSUpgradeable {
         uint24 feeType,
         uint256 validFor,
         address _to
-    ) external payable {
+    ) external payable returns (uint256) {
         require(msg.value > 0, "Must pass non 0 ETH amount");
-        uint160 sqrtPriceLimitX96 = 0;
 
         ISwapRouter.ExactOutputSingleParams memory params = ISwapRouter.ExactOutputSingleParams(
             WETH_native,
@@ -71,6 +71,6 @@ contract UniswapV3Exchange is OwnableUpgradeable, UUPSUpgradeable {
             (bool success, ) = msg.sender.call{ value: msg.value - amountIn }("");
             require(success);
         }
-        return amountIn
+        return amountIn;
     }
 }
