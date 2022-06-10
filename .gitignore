@@ -20,3 +20,5 @@ scripts/setupStableCoin.js
 .openzeppelin
 coverage.json
 yarn-error.log
+artifacts/@openzeppelin
+artifacts/@uniswap
