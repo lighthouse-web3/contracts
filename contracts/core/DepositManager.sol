@@ -32,6 +32,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
      */
     event whiteListingAddressEvent(address indexed whitelistAddress, bool indexed status);
     uint256 private _costOfStorage;
+    uint256 public initalStorageSize;
 
     mapping(address => Deposit[]) public deposits;
     mapping(address => Storage) public storageList;
@@ -47,7 +48,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     struct Storage {
         uint256 totalStored;
         uint256 availableStorage;
-        bool isNewUser;
+        bool isKnownUser;
         string[] fileHashs;
     }
 
@@ -71,6 +72,15 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         _updateAvailableStorage(msg.sender, storagePurchased);
         IERC20(_coinAddress).transferFrom(wallet, address(this), _amount);
         emit AddDepositEvent(msg.sender, _coinAddress, _amount, _costOfStorage, storagePurchased);
+    }
+
+    /** 
+    * @dev the function set the storage Size new User will start with
+
+    * @param _initalStorageSize value
+    */
+    function setInitalStorageSize(uint256 _initalStorageSize) public onlyOwner {
+        initalStorageSize = _initalStorageSize;
     }
 
     /** 
@@ -183,6 +193,10 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         uint256 filesize,
         string calldata fileHash
     ) public ManagerorOwner {
+        if(!storageList[user].isKnownUser){
+            _updateAvailableStorage(user,initalStorageSize);
+            storageList[user].isKnownUser=true;
+        }
         storageList[user].fileHashs.push(fileHash);
         storageList[user].totalStored = storageList[user].totalStored.add(filesize);
         storageList[user].availableStorage = storageList[user].availableStorage.sub(filesize);
