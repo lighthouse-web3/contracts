@@ -22,3 +22,6 @@ coverage.json
 yarn-error.log
 artifacts/@openzeppelin
 artifacts/@uniswap
+artifacts/contracts/mock
+artifacts/contracts/exchange
+artifacts/@chainlink

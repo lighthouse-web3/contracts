@@ -83,18 +83,6 @@ contract Billing is IBilling, OwnableUpgradeable, UUPSUpgradeable {
         emit withdrawApproval(_to, _asset, _amount);
     }
 
-    /// @dev this function allows the owner to transfer native ether
-    /// to an address
-    /// @param _amount Amount to claim
-    /// @param _to the recipient Address
-    function claimEth(address _to, uint256 _amount) external onlyOwner {
-        assert(payable(address(this)).balance >= _amount);
-        payable(_to).transfer(_amount);
-        emit withdrawApproval(_to, address(0), _amount);
-    }
-
-    receive() external payable {}
-
     /// @dev this function calculates the amount cost of a subscription relate
     /// to the rate of the stablecoin specified
     /// @param tokenAddress Address of the token

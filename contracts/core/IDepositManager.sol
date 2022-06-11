@@ -5,6 +5,7 @@ pragma solidity ^0.8.0;
  * @dev Interface of the lighthouse.sol
  */
 interface IDepositManager {
+
     /**
      * @dev Purchase Storage from with accepted stable coin
      */

@@ -78,6 +78,39 @@ describe("LighthouseContract", () => {
     balance = await deposit.getAvailableSpace(account3.address);
     expect(balance).to.equal(2147483650);
   });
+
+  it("should get estimate", async () => {
+    let data = 1024 ** 3;
+    let delta = 10**-11
+    const PriceAggregator = await ethers.getContractFactory("PriceAggregator");
+    const priceAggregator = await PriceAggregator.deploy();
+    let tx = await deposit.changePriceFeed(priceAggregator.address);
+    tx = await tx.wait();
+    let priceDecimals = await priceAggregator.decimals();
+    let priceData = await priceAggregator.latestRoundData();
+
+    let beforeBalance = await ethers.provider.getBalance(`${account4.address}`);
+
+    //deposits preset is 5$ per gb
+    let cost = await deposit.getStorageCost(data);
+
+    //calculate 5$ worth of eth
+    price = 5 / (priceData.answer / 10 ** priceDecimals);
+    decimal = await stableCoin.decimals();
+
+    expect(cost / 10 ** decimal).to.be.closeTo(price, delta);
+
+    tx = await deposit.instantStorage(`${account4.address}`, data, "filename", { value: cost });
+    tx = await tx.wait();
+
+    tx = await deposit.claimEth(account4.address, cost);
+    tx = await tx.wait();
+
+    let newBalance = await ethers.provider.getBalance(`${account4.address}`);
+
+    expect((newBalance - beforeBalance) / 10 ** decimal).to.be.closeTo(cost/10**decimal,delta);
+  });
+
   it("new User with initalStorageSize", async () => {
     tx = await deposit.setInitalStorageSize(1024 ** 3);
     const cid = "0x3fd54831f488a22b28398de0c567a3b064b937f54f81739ae9bd545967f3abab",
@@ -90,6 +123,7 @@ describe("LighthouseContract", () => {
     tx = await deposit.getAvailableSpace(account3.address);
     expect(tx).to.equal(1024 ** 3 - 1000 ** 3);
   });
+
   it("checking bundles", async () => {
     await deposit.updateAvailableStorage("0x4932b72f8F88e741366a30aa27492aFEd143A5E1", 1000000000);
 

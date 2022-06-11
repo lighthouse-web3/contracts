@@ -13,6 +13,14 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     using SafeMath for uint256;
 
     /**
+     * @dev Emitted when a withdraw approval is given
+     *
+     *
+     * Note  account must a subscription
+     */
+    event withdrawApproval(address indexed account, address indexed tokenAddress, uint256 indexed amount);
+
+    /**
      * @dev Emitted when a Deposit is made
      *
      * Note that `value` may be zero.
@@ -111,7 +119,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     function getStorageCost(uint256 size) public view returns (uint256) {
         require(address(priceFeed) != address(0), "price feed not set");
         (, int256 price, , , ) = priceFeed.latestRoundData();
-        return size.mul(1 ether).mul(1e8).div(_costOfStorage.mul(uint256(price)));
+        return size.mul(1 ether).mul(10**priceFeed.decimals()).div(_costOfStorage.mul(uint256(price)));
     }
 
     /** 
@@ -134,6 +142,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     ) external onlyOwner {
         require(amount <= IERC20(_coinAddress).balanceOf(address(this)));
         IERC20(_coinAddress).transfer(wallet, amount);
+        emit withdrawApproval(wallet, _coinAddress, amount);
     }
 
     /**
@@ -193,9 +202,9 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         uint256 filesize,
         string calldata fileHash
     ) public ManagerorOwner {
-        if(!storageList[user].isKnownUser){
-            _updateAvailableStorage(user,initalStorageSize);
-            storageList[user].isKnownUser=true;
+        if (!storageList[user].isKnownUser) {
+            _updateAvailableStorage(user, initalStorageSize);
+            storageList[user].isKnownUser = true;
         }
         storageList[user].fileHashs.push(fileHash);
         storageList[user].totalStored = storageList[user].totalStored.add(filesize);
@@ -219,7 +228,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         string calldata fileHash
     ) public payable {
         assert(msg.value >= getStorageCost(filesize));
-        _updateAvailableStorage(msg.sender, filesize);
+        _updateAvailableStorage(user, filesize);
         storageList[user].fileHashs.push(fileHash);
         storageList[user].totalStored = storageList[user].totalStored.add(filesize);
         storageList[user].availableStorage = storageList[user].availableStorage.sub(filesize);
@@ -266,4 +275,16 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
         require(whiteListedAddr[msg.sender] || msg.sender == owner(), "Account Not Whitelisted");
         _;
     }
+
+    /// @dev this function allows the owner to transfer native ether
+    /// to an address
+    /// @param _amount Amount to claim
+    /// @param _to the recipient Address
+    function claimEth(address payable _to, uint256 _amount) external onlyOwner {
+        assert(payable(address(this)).balance >= _amount);
+        _to.transfer(_amount);
+        emit withdrawApproval(_to, address(0), _amount);
+    }
+
+    receive() external payable {}
 }

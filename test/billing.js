@@ -14,14 +14,8 @@ beforeEach(async () => {
   stableCoin = await StableCoin.deploy();
 
   await stableCoin.faucet(owner, ethers.utils.parseUnits("1000", "ether"));
-  await stableCoin.faucet(
-    account2.address,
-    ethers.utils.parseUnits("60", "ether")
-  );
-  await stableCoin.faucet(
-    account3.address,
-    ethers.utils.parseUnits("300", "ether")
-  );
+  await stableCoin.faucet(account2.address, ethers.utils.parseUnits("60", "ether"));
+  await stableCoin.faucet(account3.address, ethers.utils.parseUnits("300", "ether"));
 });
 
 describe("Billing Contract", () => {
@@ -40,13 +34,7 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
 
     let data = await billing.contractSubscriptions(0);
-    expect(data).to.include.all.keys([
-      "frequencyOfDeduction",
-      "deductionIN",
-      "amount",
-      "isActive",
-      "code",
-    ]);
+    expect(data).to.include.all.keys(["frequencyOfDeduction", "deductionIN", "amount", "isActive", "code"]);
     expect(data).to.have.property("frequencyOfDeduction", 4);
     expect(data).to.have.property("deductionIN", 2);
     expect(data.amount.toString()).to.equal("3500000");
@@ -78,9 +66,7 @@ describe("Billing Contract", () => {
     try {
       data = await billing.getAmountToBeDeducted(stableCoin.address, 0);
     } catch (e) {
-      expect(e.message).to.include(
-        "VM Exception while processing transaction:"
-      );
+      expect(e.message).to.include("VM Exception while processing transaction:");
     }
   });
 
@@ -142,10 +128,7 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
 
-    stableCoin.approve(
-      billing.address,
-      `${price * subData.frequencyOfDeduction}`
-    );
+    stableCoin.approve(billing.address, `${price * subData.frequencyOfDeduction}`);
     tx = await billing.activateSubscription(0, stableCoin.address);
     tx = await billing.isSubscriptionActive(owner);
     tx = await tx.wait();
@@ -171,15 +154,12 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
 
-    stableCoin.approve(
-      billing.address,
-      `${price * subData.frequencyOfDeduction}`
-    );
+    stableCoin.approve(billing.address, `${price * subData.frequencyOfDeduction}`);
     try {
       tx = await billing.activateSubscription(0, stableCoin.address);
     } catch (e) {
       expect(e.message).to.include(
-        "VM Exception while processing transaction: reverted with reason string 'this offer has expired'"
+        "VM Exception while processing transaction: reverted with reason string 'this offer has expired'",
       );
     }
   });
@@ -195,7 +175,7 @@ describe("Billing Contract", () => {
       tx = await billing.cancelSubscription();
     } catch (e) {
       expect(e.message).to.include(
-        "VM Exception while processing transaction: reverted with reason string 'No active subscription'"
+        "VM Exception while processing transaction: reverted with reason string 'No active subscription'",
       );
     }
   });
@@ -217,10 +197,7 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
 
-    stableCoin.approve(
-      billing.address,
-      `${price * subData.frequencyOfDeduction}`
-    );
+    stableCoin.approve(billing.address, `${price * subData.frequencyOfDeduction}`);
     tx = await billing.activateSubscription(0, stableCoin.address);
     tx = await billing.isSubscriptionActive(owner);
     tx = await tx.wait();
@@ -252,10 +229,7 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
 
-    tx = await stableCoin.approve(
-      billing.address,
-      `${price * subData.frequencyOfDeduction}`
-    );
+    tx = await stableCoin.approve(billing.address, `${price * subData.frequencyOfDeduction}`);
     tx = await tx.wait();
     tx = await billing.activateSubscription(0, stableCoin.address);
     tx = await billing.isSubscriptionActive(owner);
@@ -269,7 +243,7 @@ describe("Billing Contract", () => {
       tx = await billing.isSubscriptionActive(owner);
     } catch (e) {
       expect(e.message).to.include(
-        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'"
+        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'",
       );
     }
   });
@@ -291,10 +265,7 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
 
-    tx = await stableCoin.approve(
-      billing.address,
-      `${price * subData.frequencyOfDeduction}`
-    );
+    tx = await stableCoin.approve(billing.address, `${price * subData.frequencyOfDeduction}`);
     tx = await tx.wait();
     tx = await billing.activateSubscription(0, stableCoin.address);
     tx = await billing.isSubscriptionActive(owner);
@@ -308,7 +279,7 @@ describe("Billing Contract", () => {
       tx = await billing.isSubscriptionActive(owner);
     } catch (e) {
       expect(e.message).to.include(
-        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'"
+        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'",
       );
     }
   });
@@ -332,10 +303,7 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
 
-    tx = await stableCoin.approve(
-      billing.address,
-      `${price * subData.frequencyOfDeduction}`
-    );
+    tx = await stableCoin.approve(billing.address, `${price * subData.frequencyOfDeduction}`);
     tx = await tx.wait();
     tx = await billing.activateSubscription(0, stableCoin.address);
     tx = await billing.isSubscriptionActive(owner);
@@ -349,28 +317,19 @@ describe("Billing Contract", () => {
       tx = await billing.isSubscriptionActive(owner);
     } catch (e) {
       expect(e.message).to.include(
-        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'"
+        "VM Exception while processing transaction: reverted with reason string 'subscription expired or doesn't exist'",
       );
     }
 
     expect(await stableCoin.balanceOf(account4.address)).to.equal(0);
 
     let contractBalance = await stableCoin.balanceOf(billing.address);
-    tx = await billing.claim(
-      stableCoin.address,
-      account4.address,
-      contractBalance.toString()
-    );
+    tx = await billing.claim(stableCoin.address, account4.address, contractBalance.toString());
     tx = await tx.wait();
 
-    tx = await stableCoin
-      .connect(account4)
-      .transferFrom(billing.address, account4.address, contractBalance);
-    expect(await stableCoin.balanceOf(account4.address)).to.equal(
-      contractBalance
-    );
+    tx = await stableCoin.connect(account4).transferFrom(billing.address, account4.address, contractBalance);
+    expect(await stableCoin.balanceOf(account4.address)).to.equal(contractBalance);
   });
-
 
   it("Should active Subscription ", async () => {
     const subData = {
@@ -389,10 +348,7 @@ describe("Billing Contract", () => {
     tx = await tx.wait();
     price = await billing.getAmountToBeDeducted(stableCoin.address, 0);
 
-    tx = await stableCoin.connect(account4).approve(
-      billing.address,
-      `${price * subData.frequencyOfDeduction}`
-    );
+    tx = await stableCoin.connect(account4).approve(billing.address, `${price * subData.frequencyOfDeduction}`);
     tx = await billing.connect(account4).activateSubscription(0, stableCoin.address);
     tx = await billing.isSubscriptionActive(owner);
     tx = await tx.wait();
