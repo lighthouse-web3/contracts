@@ -81,7 +81,7 @@ describe("LighthouseContract", () => {
 
   it("should get estimate", async () => {
     let data = 1024 ** 3;
-    let delta = 10**-11
+    let delta = 10 ** -11;
     const PriceAggregator = await ethers.getContractFactory("PriceAggregator");
     const priceAggregator = await PriceAggregator.deploy();
     let tx = await deposit.changePriceFeed(priceAggregator.address);
@@ -108,7 +108,7 @@ describe("LighthouseContract", () => {
 
     let newBalance = await ethers.provider.getBalance(`${account4.address}`);
 
-    expect((newBalance - beforeBalance) / 10 ** decimal).to.be.closeTo(cost/10**decimal,delta);
+    expect((newBalance - beforeBalance) / 10 ** decimal).to.be.closeTo(cost / 10 ** decimal, delta);
   });
 
   it("new User with initalStorageSize", async () => {

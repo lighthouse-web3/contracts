@@ -355,8 +355,8 @@ describe("Billing Contract", () => {
     expect(tx.events[0].args.active).to.equal(false);
   });
 
-  it("test upgrade",async()=>{
+  it("test upgrade", async () => {
     const Billing = await ethers.getContractFactory("Billing");
-    let tx = await upgrades.upgradeProxy(billing.address,Billing, { kind: "uups" });
-  })
+    let tx = await upgrades.upgradeProxy(billing.address, Billing, { kind: "uups" });
+  });
 });
