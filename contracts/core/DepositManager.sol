@@ -229,9 +229,7 @@ contract DepositManager is OwnableUpgradeable, UUPSUpgradeable {
     ) public payable {
         assert(msg.value >= getStorageCost(filesize));
         _updateAvailableStorage(user, filesize);
-        storageList[user].fileHashs.push(fileHash);
-        storageList[user].totalStored = storageList[user].totalStored.add(filesize);
-        storageList[user].availableStorage = storageList[user].availableStorage.sub(filesize);
+        updateStorage(user, filesize, fileHash);
     }
 
     /**

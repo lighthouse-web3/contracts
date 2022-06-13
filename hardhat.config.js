@@ -105,6 +105,7 @@ module.exports = {
     matictestnet: {
       url: POLYGON_RPC_URL,
       accounts: [PRIVATE_KEY],
+      chainId: 80001,
       saveDeployments: true,
     },
   },
