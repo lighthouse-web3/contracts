@@ -2,7 +2,7 @@
  * @type import('hardhat/config').HardhatUserConfig
  */
 require("dotenv").config();
-require("solidity-coverage")
+require("solidity-coverage");
 require("@nomiclabs/hardhat-waffle");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-web3");
@@ -11,6 +11,7 @@ const MAINNET_RPC_URL =
   process.env.MAINNET_RPC_URL || process.env.ALCHEMY_MAINNET_RPC_URL || "";
 const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL || "";
 const KOVAN_RPC_URL = process.env.KOVAN_RPC_URL || "";
+const POLYGON_KEY = process.env.POLYGON_KEY || "";
 const MNEMONIC = process.env.MNEMONIC || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 
@@ -33,7 +34,7 @@ task("balance", "Prints an account's balance")
 
     console.log(web3.utils.fromWei(balance, "ether"), "ETH");
   });
- 
+
 module.exports = {
   // defaultNetwork: "hardhat",
   networks: {
@@ -70,6 +71,15 @@ module.exports = {
     fantomTest: {
       url: "https://rpc.ankr.com/fantom_testnet/",
       accounts: [PRIVATE_KEY],
+      chainId: 4002,
+      // accounts: {
+      //     mnemonic: MNEMONIC,
+      // }
+    },
+    fuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      accounts: [PRIVATE_KEY],
+      chainId: 43113,
       // accounts: {
       //     mnemonic: MNEMONIC,
       // }
@@ -91,7 +101,7 @@ module.exports = {
       saveDeployments: true,
     },
     matictestnet: {
-      url: "https://rpc-mumbai.maticvigil.com/",
+      url: `https://rpc-mumbai.maticvigil.com/v1/${POLYGON_KEY}`,
       accounts: [PRIVATE_KEY],
       saveDeployments: true,
     },

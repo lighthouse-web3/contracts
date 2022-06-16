@@ -53,9 +53,9 @@ beforeEach(async () => {
 
   await deposit.setWhiteListAddr(lighthouse.address, true);
 
-  console.log(`Owner Address : ${owner}`);
-  console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);
-  console.log(`Deposit Contract deployed at : ${deposit.address}`);
+  // console.log(`Owner Address : ${owner}`);
+  // console.log(`Lighthouse Contract deployed at : ${lighthouse.address}`);
+  // console.log(`Deposit Contract deployed at : ${deposit.address}`);
 });
 
 describe("LighthouseContract", () => {
