@@ -1,3 +1,3 @@
 module.exports = {
-  skipFiles: ["stablecoins/dai.sol", "ProviderRegistry.sol"],
+  skipFiles: ["mock","exchange", "ProviderRegistry.sol","bridge/Bridger.sol"],
 };

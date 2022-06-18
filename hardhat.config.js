@@ -6,14 +6,16 @@ require("solidity-coverage");
 require("@nomiclabs/hardhat-waffle");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-web3");
+require("hardhat-gas-reporter");
+require("hardhat-contract-sizer");
 
-const MAINNET_RPC_URL =
-  process.env.MAINNET_RPC_URL || process.env.ALCHEMY_MAINNET_RPC_URL || "";
+const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL || process.env.ALCHEMY_MAINNET_RPC_URL || "";
 const RINKEBY_RPC_URL = process.env.RINKEBY_RPC_URL || "";
 const KOVAN_RPC_URL = process.env.KOVAN_RPC_URL || "";
-const POLYGON_KEY = process.env.POLYGON_KEY || "";
+const POLYGON_RPC_URL = process.env.POLYGON_RPC_URL || "";
 const MNEMONIC = process.env.MNEMONIC || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
+const REPORT_GAS = process.env.REPORT_GAS || false;
 
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
@@ -28,7 +30,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 
 task("balance", "Prints an account's balance")
   .addParam("account", "The account's address")
-  .setAction(async (taskArgs) => {
+  .setAction(async taskArgs => {
     const account = web3.utils.toChecksumAddress(taskArgs.account);
     const balance = await web3.eth.getBalance(account);
 
@@ -39,12 +41,17 @@ module.exports = {
   // defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      // // If you want to do some forking, uncomment this
-      // forking: {
-      //   url: MAINNET_RPC_URL
-      // }
+      gas: 12000000,
+      blockGasLimit: 0x1fffffffffffff,
+      allowUnlimitedContractSize: true,
+      timeout: 1800000
     },
-    localhost: {},
+    localhost: {
+      gas: 12000000,
+      blockGasLimit: 0x1fffffffffffff,
+      allowUnlimitedContractSize: true,
+      timeout: 1800000
+    },
     kovan: {
       url: KOVAN_RPC_URL,
       accounts: [PRIVATE_KEY],
@@ -101,8 +108,9 @@ module.exports = {
       saveDeployments: true,
     },
     matictestnet: {
-      url: `https://rpc-mumbai.maticvigil.com/v1/${POLYGON_KEY}`,
+      url: POLYGON_RPC_URL,
       accounts: [PRIVATE_KEY],
+      chainId: 80001,
       saveDeployments: true,
     },
   },
@@ -110,6 +118,12 @@ module.exports = {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
     apiKey: ETHERSCAN_API_KEY,
+  },
+  gasReporter: {
+    enabled: REPORT_GAS,
+    currency: "USD",
+    outputFile: "gas-report.txt",
+    noColors: true,
   },
   namedAccounts: {
     deployer: {
@@ -129,7 +143,8 @@ module.exports = {
         version: "0.7.0",
       },
       {
-        version: "0.6.6",
+        version: "0.6.12",
+        settings: {},
       },
       {
         version: "0.4.24",
