@@ -122,6 +122,15 @@ describe("LighthouseContract", () => {
 
     tx = await deposit.getAvailableSpace(account3.address);
     expect(tx).to.equal(1024 ** 3 - 1000 ** 3);
+
+
+    tx = await lighthouse.connect(account4).store("bafkreiawpqdymg6bjfg5neiunfx2yoq36ss5ets6326ins5b6qnif6qis4", "", "me2.jpg", 31462, {
+      gasLimit: 500000
+    });
+    await tx.wait();
+
+    tx = await deposit.getAvailableSpace(account3.address);
+    expect(tx).to.equal(1024 ** 3 - 1000 ** 3);
   });
 
   it("checking bundles", async () => {

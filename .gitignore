@@ -25,3 +25,8 @@ artifacts/@uniswap
 artifacts/contracts/mock
 artifacts/contracts/exchange
 artifacts/@chainlink
+artifacts/@sushiswap
+scripts/test,js
+scripts/test.js
+artifacts/hardhat
+artifacts/hardhat/console.sol
