@@ -1,51 +1,26 @@
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
-const crypto = require("crypto");
 
-let Lighthouse,
-  lighthouse,
-  Deposit,
-  deposit,
-  owner,
-  StableCoin,
-  stableCoin,
-  account2,
-  account3,
-  account4;
+let Lighthouse, lighthouse, Deposit, deposit, owner, StableCoin, stableCoin, account2, account3, account4;
 
-function generateRandomAddressSigner() {
-  return new ethers.Wallet.createRandom();
-}
 beforeEach(async () => {
   [owner, account2, account3, account4] = await ethers.getSigners();
   owner = owner.address;
 
-  Deposit = await ethers.getContractFactory(
-    "contracts/DepositManager.sol:DepositManager"
-  );
+  Deposit = await ethers.getContractFactory("contracts/core/DepositManager.sol:DepositManager");
   deposit = await upgrades.deployProxy(Deposit, { kind: "uups" });
 
-  Lighthouse = await ethers.getContractFactory(
-    "contracts/Lighthouse.sol:Lighthouse"
-  );
-  lighthouse = await upgrades.deployProxy(
-    Lighthouse,
-    [deposit.address],
-    { kind: "uups", }
-  );
+  Lighthouse = await ethers.getContractFactory("contracts/core/Lighthouse.sol:Lighthouse");
+  lighthouse = await upgrades.deployProxy(Lighthouse, [deposit.address], {
+    kind: "uups",
+  });
 
   StableCoin = await ethers.getContractFactory("Dai");
   stableCoin = await StableCoin.deploy();
 
   await stableCoin.faucet(owner, ethers.utils.parseUnits("1000", "ether"));
-  await stableCoin.faucet(
-    account2.address,
-    ethers.utils.parseUnits("60", "ether")
-  );
-  await stableCoin.faucet(
-    account3.address,
-    ethers.utils.parseUnits("300", "ether")
-  );
+  await stableCoin.faucet(account2.address, ethers.utils.parseUnits("60", "ether"));
+  await stableCoin.faucet(account3.address, ethers.utils.parseUnits("300", "ether"));
 
   // set the manager of the deposit contract;
 
@@ -67,14 +42,11 @@ describe("LighthouseContract", () => {
     let tx = await deposit.updateAvailableStorage(account3.address, 1000);
     await tx.wait();
 
-    const cid =
-        "0x3fd54831f488a22b28398de0c567a3b064b937f54f81739ae9bd545967f3abab",
+    const cid = "0x3fd54831f488a22b28398de0c567a3b064b937f54f81739ae9bd545967f3abab",
       config = "config",
       filename = "filename",
       filesize = 100;
-    tx = await lighthouse
-      .connect(account3)
-      .store(cid, config, filename, filesize);
+    tx = await lighthouse.connect(account3).store(cid, config, filename, filesize);
     await tx.wait();
 
     // @todo test case should check if final available storage is 900
@@ -85,53 +57,92 @@ describe("LighthouseContract", () => {
   it("Adding deposit", async () => {
     let intialBalance = ethers.utils.formatUnits(
       await stableCoin.connect(account3).balanceOf(account3.address),
-      "ether"
+      "ether",
     );
 
     let purchaseAmount = ethers.utils.parseUnits("10.0", "ether");
     //approve coins
-    var data = await stableCoin
-      .connect(account3)
-      .approve(deposit.address, purchaseAmount);
+    var data = await stableCoin.connect(account3).approve(deposit.address, purchaseAmount);
     data = await data.wait();
 
     let balance = await deposit.getAvailableSpace(account3.address);
     expect(balance).to.equal(0);
 
-    await deposit
-      .connect(account3)
-      .addDeposit(stableCoin.address, purchaseAmount);
+    await deposit.connect(account3).addDeposit(stableCoin.address, purchaseAmount);
 
     // @todo test should check the balance of the deposit contract after calling this function
-    data = +ethers.utils.formatUnits(
-      await stableCoin.connect(account3).balanceOf(account3.address),
-      "ether"
-    );
-    expect(data).to.equal(
-      intialBalance - ethers.utils.formatUnits(purchaseAmount, "ether")
-    );
+    data = +ethers.utils.formatUnits(await stableCoin.connect(account3).balanceOf(account3.address), "ether");
+    expect(data).to.equal(intialBalance - ethers.utils.formatUnits(purchaseAmount, "ether"));
 
     // @todo make another test which test the new available storage of the user after deposit is complete
     balance = await deposit.getAvailableSpace(account3.address);
     expect(balance).to.equal(2147483650);
   });
+
+  it("should get estimate", async () => {
+    let data = 1024 ** 3;
+    let delta = 10 ** -11;
+    const PriceAggregator = await ethers.getContractFactory("PriceAggregator");
+    const priceAggregator = await PriceAggregator.deploy();
+    let tx = await deposit.changePriceFeed(priceAggregator.address);
+    tx = await tx.wait();
+    let priceDecimals = await priceAggregator.decimals();
+    let priceData = await priceAggregator.latestRoundData();
+
+    let beforeBalance = await ethers.provider.getBalance(`${account4.address}`);
+
+    //deposits preset is 5$ per gb
+    let cost = await deposit.getStorageCost(data);
+
+    //calculate 5$ worth of eth
+    price = 5 / (priceData.answer / 10 ** priceDecimals);
+    decimal = await stableCoin.decimals();
+
+    expect(cost / 10 ** decimal).to.be.closeTo(price, delta);
+
+    tx = await deposit.instantStorage(`${account4.address}`, data, "filename", { value: cost });
+    tx = await tx.wait();
+
+    tx = await deposit.claimEth(account4.address, cost);
+    tx = await tx.wait();
+
+    let newBalance = await ethers.provider.getBalance(`${account4.address}`);
+
+    expect((newBalance - beforeBalance) / 10 ** decimal).to.be.closeTo(cost / 10 ** decimal, delta);
+  });
+
+  it("new User with initalStorageSize", async () => {
+    tx = await deposit.setInitalStorageSize(1024 ** 3);
+    const cid = "0x3fd54831f488a22b28398de0c567a3b064b937f54f81739ae9bd545967f3abab",
+      config = "config",
+      filename = "filename",
+      filesize = 1000 ** 3;
+    tx = await lighthouse.connect(account3).store(cid, config, filename, filesize);
+    await tx.wait();
+
+    tx = await deposit.getAvailableSpace(account3.address);
+    expect(tx).to.equal(1024 ** 3 - 1000 ** 3);
+
+
+    tx = await lighthouse.connect(account4).store("bafkreiawpqdymg6bjfg5neiunfx2yoq36ss5ets6326ins5b6qnif6qis4", "", "me2.jpg", 31462, {
+      gasLimit: 500000
+    });
+    await tx.wait();
+
+    tx = await deposit.getAvailableSpace(account3.address);
+    expect(tx).to.equal(1024 ** 3 - 1000 ** 3);
+  });
+
   it("checking bundles", async () => {
-    await deposit.updateAvailableStorage(
-      "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
-      1000000000
-    );
+    await deposit.updateAvailableStorage("0x4932b72f8F88e741366a30aa27492aFEd143A5E1", 1000000000);
 
     const cid_bundles = [...Array(100).keys()].fill(
       "0x3fd54831f488a22b28398de0c567a3b064b937f54f81739ae9bd545967f3abaa",
       0,
-      1000
+      1000,
     );
     const config = [...Array(100).keys()].fill("config", 0, 1000);
-    const users = [...Array(100).keys()].fill(
-      "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
-      0,
-      1000
-    );
+    const users = [...Array(100).keys()].fill("0x4932b72f8F88e741366a30aa27492aFEd143A5E1", 0, 1000);
     const fileName = [...Array(100).keys()].fill("fileName", 0, 1000);
     const fileSize = [...Array(100).keys()];
     const timestamps = [...Array(100).keys()];
@@ -141,14 +152,7 @@ describe("LighthouseContract", () => {
     await lighthouse.bundleStore(structarr);
 
     for (let i = 0; i < cid_bundles.length; ++i) {
-      structarr.push([
-        users[i],
-        cid_bundles[i],
-        "",
-        fileName[i],
-        fileSize[i],
-        timestamps[i],
-      ]);
+      structarr.push([users[i], cid_bundles[i], "", fileName[i], fileSize[i], timestamps[i]]);
     }
     let chunk = 100;
     const length = structarr.length;
@@ -158,24 +162,16 @@ describe("LighthouseContract", () => {
     }
   });
 
-
   it("test edgeCase", async () => {
-    await deposit.updateAvailableStorage(
-      "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
-      1e2
-    );
+    await deposit.updateAvailableStorage("0x4932b72f8F88e741366a30aa27492aFEd143A5E1", 1e2);
 
     const cid_bundles = [...Array(100).keys()].fill(
       "0x3fd54831f488a22b28398de0c567a3b064b937f54f81739ae9bd545967f3abaa",
       0,
-      1e6
+      1e6,
     );
     const config = [...Array(100).keys()].fill("config", 0, 1000);
-    const users = [...Array(100).keys()].fill(
-      "0x4932b72f8F88e741366a30aa27492aFEd143A5E1",
-      0,
-      1000
-    );
+    const users = [...Array(100).keys()].fill("0x4932b72f8F88e741366a30aa27492aFEd143A5E1", 0, 1000);
     const fileName = [...Array(100).keys()].fill("fileName", 0, 1000);
     const fileSize = [...Array(100).keys()];
     const timestamps = [...Array(100).keys()];
@@ -184,14 +180,7 @@ describe("LighthouseContract", () => {
     await lighthouse.bundleStore(structarr);
 
     for (let i = 0; i < cid_bundles.length; ++i) {
-      structarr.push([
-        users[i],
-        cid_bundles[i],
-        "",
-        fileName[i],
-        fileSize[i],
-        timestamps[i],
-      ]);
+      structarr.push([users[i], cid_bundles[i], "", fileName[i], fileSize[i], timestamps[i]]);
     }
     let chunk = 100;
     const length = structarr.length;
@@ -218,7 +207,7 @@ describe("LighthouseContract", () => {
       data = await deposit.addDeposit(stableCoin.address, 10);
     } catch (e) {
       expect(e.message).to.equal(
-        "VM Exception while processing transaction: reverted with reason string 'suggest coin to Admin'"
+        "VM Exception while processing transaction: reverted with reason string 'suggest coin to Admin'",
       );
     }
   });
@@ -232,7 +221,7 @@ describe("LighthouseContract", () => {
       data = await data.wait();
     } catch (e) {
       expect(e.message).to.equal(
-        "VM Exception while processing transaction: reverted with reason string 'coin already disabled'"
+        "VM Exception while processing transaction: reverted with reason string 'coin already disabled'",
       );
     }
   });
@@ -243,7 +232,7 @@ describe("LighthouseContract", () => {
       throw new Error("Invalid");
     } catch (err) {
       expect(err.message).to.equal(
-        "VM Exception while processing transaction: reverted with reason string 'Account Not Whitelisted'"
+        "VM Exception while processing transaction: reverted with reason string 'Account Not Whitelisted'",
       );
     }
   });
@@ -251,9 +240,7 @@ describe("LighthouseContract", () => {
   it("Accept whitelisted for contracts Marked with the modifier", async () => {
     let tx = await deposit.setWhiteListAddr(account2.address, true);
     tx.wait();
-    tx = await deposit
-      .connect(account2)
-      .updateAvailableStorage(account2.address, 1000);
+    tx = await deposit.connect(account2).updateAvailableStorage(account2.address, 1000);
     tx.wait();
     tx = await deposit.getAvailableSpace(account2.address);
     expect(parseInt(tx)).to.equal(1000);
@@ -269,7 +256,7 @@ describe("LighthouseContract", () => {
       throw new Error("Invalid");
     } catch (err) {
       expect(err.message).to.equal(
-        "VM Exception while processing transaction: reverted with reason string 'Account Not Whitelisted'"
+        "VM Exception while processing transaction: reverted with reason string 'Account Not Whitelisted'",
       );
     }
   });
@@ -291,14 +278,27 @@ describe("LighthouseContract", () => {
 
     expect(data).to.equal(mintData);
 
-    data = await deposit.transferAmount(
-      stableCoin.address,
-      account4.address,
-      mintData
-    );
+    data = await deposit.transferAmount(stableCoin.address, account4.address, mintData);
 
     data = await stableCoin.balanceOf(deposit.address);
 
     expect(data).to.equal(0);
+  });
+
+  it("Should emit StorageStatusRequest event", async () => {
+    await expect(lighthouse.requestStorageStatus("QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR")).to.emit(
+      lighthouse,
+      "StorageStatusRequest",
+    );
+  });
+
+  it("Should publish/set Storage Status", async () => {
+    const dealId = "1243324";
+    let tx = await lighthouse.publishStorageStatus("QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR", dealId, true);
+    tx = await tx.wait();
+
+    data = await lighthouse.statuses("QmbWqxBEKC3P8tqsKc98xmWNzrzDtRLMiMPL8wBuTGsMnR");
+    expect(data.active).to.equal(true);
+    expect(data.dealIds).to.equal(dealId);
   });
 });

@@ -19,7 +19,7 @@ async function main() {
   );
 
   const USDC = await ethers.getContractAt("Dai", USDC_ON_FANTOM, deployer);
-  let tx = await bridger.getSwapFee(CHAIN_ID_POLYGON, RenRouter);
+  let tx = await bridger.getSwapFee(CHAIN_ID_POLYGON);
   const transfee = tx.toString();
   console.log(await USDC.balanceOf(deployer.address));
 
