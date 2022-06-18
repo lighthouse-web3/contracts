@@ -18,7 +18,7 @@ async function main() {
   let tx = await Swap.swapTokenToToken(
     USDT,
     deployer.address,
-    `${0.01 * 1e18}`,
+    `${0.001 * 1e18}`,
     `${1 * 1e20}`,
     parseInt(Date.now() / 1000) + 600,
   );
