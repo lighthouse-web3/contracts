@@ -15,6 +15,7 @@ interface IWETH {
     function transfer(address to, uint256 value) external returns (bool);
 
     function withdraw(uint256) external;
+
     function approve(address guy, uint256 wad) external returns (bool);
 }
 
@@ -39,7 +40,7 @@ interface IUniswap {
         address[] calldata path,
         address to,
         uint256 deadline
-    ) external returns (uint256[] memory amounts);
+    ) external payable returns (uint256[] memory amounts);
 
     function WETH() external pure returns (address);
 }
@@ -63,13 +64,12 @@ contract SwapClient is OwnableUpgradeable, UUPSUpgradeable {
         address to,
         uint256 amount,
         uint256 deadline
-    ) public returns (uint256) {
+    ) public payable returns (uint256) {
         assert(tokenSupported[tokenAddress]);
         address[] memory path = new address[](2);
         path[0] = router.WETH();
         path[1] = tokenAddress;
-
-        uint256[] memory amounts = router.swapETHForExactTokens(amount, path, to, deadline);
+        uint256[] memory amounts = router.swapETHForExactTokens{ value: msg.value }(amount, path, to, deadline);
         return amounts[0];
     }
 
@@ -84,7 +84,7 @@ contract SwapClient is OwnableUpgradeable, UUPSUpgradeable {
         address[] memory path = new address[](2);
         path[0] = router.WETH();
         path[1] = tokenAddress;
-        IWETH(router.WETH()).approve(address(router),amountIn);
+        IWETH(router.WETH()).approve(address(router), amountIn);
 
         uint256[] memory amounts = router.swapExactTokensForTokens(amountIn, amountOut, path, to, deadline);
         return amounts[0];
@@ -95,13 +95,13 @@ contract SwapClient is OwnableUpgradeable, UUPSUpgradeable {
         address to,
         uint256 amountOut,
         uint256 deadline
-    ) public returns (uint256) {
+    ) public payable returns (uint256) {
         assert(tokenSupported[tokenAddress]);
         address[] memory path = new address[](2);
         path[0] = router.WETH();
         path[1] = tokenAddress;
 
-        uint256[] memory amounts = router.swapExactETHForTokens(amountOut, path, to, deadline);
+        uint256[] memory amounts = router.swapExactETHForTokens{ value: msg.value }(amountOut, path, to, deadline);
         return amounts[0];
     }
 

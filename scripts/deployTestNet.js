@@ -6,7 +6,7 @@ async function main() {
   console.log(`Deploying contracts with the accounts: ${deployer.address}`);
 
   const balance = await deployer.getBalance();
-  console.log(`Acccount Balance: ${balance.toString()}`);
+  console.log(`Account Balance: ${balance.toString()}`);
 
   const Deposit = await ethers.getContractFactory("DepositManager");
   const deposit = await upgrades.deployProxy(Deposit, { kind: "uups" });

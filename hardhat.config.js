@@ -44,13 +44,13 @@ module.exports = {
       gas: 12000000,
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
-      timeout: 1800000
+      timeout: 1800000,
     },
     localhost: {
       gas: 12000000,
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
-      timeout: 1800000
+      timeout: 1800000,
     },
     kovan: {
       url: KOVAN_RPC_URL,
@@ -66,6 +66,7 @@ module.exports = {
       // accounts: {
       //     mnemonic: MNEMONIC,
       // },
+      chainId: 4,
       saveDeployments: true,
     },
     ganache: {
@@ -76,6 +77,7 @@ module.exports = {
       // }
     },
     fantomTest: {
+      name: "fantomTest",
       url: "https://rpc.ankr.com/fantom_testnet/",
       accounts: [PRIVATE_KEY],
       chainId: 4002,
